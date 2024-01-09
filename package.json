@@ -17,7 +17,10 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "start:swc": "nest start -b swc --type-check",
+    "dev": "nest start -b swc --type-check --watch",
+    "build:swc": "nest build -b swc"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -35,6 +38,7 @@
     "class-validator": "^0.14.0",
     "compression": "^1.7.4",
     "helmet": "^7.1.0",
+    "moment-timezone": "^0.5.44",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.11.3",
