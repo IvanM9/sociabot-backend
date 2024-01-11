@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  birthDate DateTime @db.Date
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+  role      String   @default("STUDENT") // STUDENT, TEACHER
+  status    Boolean  @default(true)
+
+  courses        Course[]
+  studentCourses Course_Student[]
+
+  @@map("users")
+}
+
+model Lesson {
+  id              String         @id @default(cuid())
+  courseStudent   Course_Student @relation(fields: [courseStudentId], references: [id])
+  courseStudentId String
+  score           Int
+  date            DateTime       @db.Timestamptz()
+  observations    String         @db.Text
+  module          Module         @relation(fields: [moduleId], references: [id])
+  moduleId        String
+  startDate       DateTime       @db.Timestamptz()
+  endDate         DateTime       @db.Timestamptz()
+  status          String         @default("PENDING") // PENDING, IN_PROGRESS, FINISHED
+
+  @@map("lessons")
+}
+
+model Module {
+  id        String   @id @default(cuid())
+  name      String
+  goals     String
+  createdBy String
+  updatedBy String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz()
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  String
+  status    Boolean  @default(true)
+  isPublic  Boolean  @default(false)
+
+  lessons Lesson[]
+  chats   Chat[]
+
+  @@map("modules")
+}
+
+model Chat {
+  id              String         @id @default(cuid())
+  date            DateTime
+  courseStudent   Course_Student @relation(fields: [courseStudentId], references: [id])
+  courseStudentId String
+  observations    String         @db.Text
+  updatedBy       String
+  createdAt       DateTime       @default(now()) @db.Timestamptz()
+  updatedAt       DateTime       @db.Timestamptz()
+  createdBy       String
+  module          Module         @relation(fields: [moduleId], references: [id])
+  moduleId        String
+
+  interactions Interaction[]
+
+  @@map("chats")
+}
+
+model Interaction {
+  id      String   @id @default(cuid())
+  user    String   @default("STUDENT") // STUDENT, BOT
+  message String   @db.Text
+  date    DateTime @db.Timestamptz()
+  chat    Chat     @relation(fields: [chatId], references: [id])
+  chatId  String
+
+  @@map("interactions")
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  teacher     User     @relation(fields: [createdBy], references: [id])
+  createdBy   String
+  updatedBy   String
+  createdAt   DateTime @default(now()) @db.Timestamptz()
+  updatedAt   DateTime @db.Timestamptz()
+  status      Boolean  @default(true)
+
+  modules  Module[]
+  students Course_Student[]
+
+  @@map("courses")
+}
+
+model Course_Student {
+  id        String   @id @default(cuid())
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  String
+  student   User     @relation(fields: [studentId], references: [id])
+  studentId String
+  createdBy String
+  updatedBy String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz()
+  status    Boolean  @default(true)
+
+  lessons Lesson[]
+  chats   Chat[]
+
+  @@map("course_students")
+}
