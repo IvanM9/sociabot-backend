@@ -11,6 +11,6 @@ export class AuthController {
   @ApiHeader({ name: 'password', required: true })
   async login(@Headers() { email, password }: any) {
     const token = await this.authService.login({ email, password });
-    return { token, message: 'logged' };
+    return { data: token, message: 'logged' };
   }
 }

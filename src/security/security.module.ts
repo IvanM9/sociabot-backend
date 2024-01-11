@@ -11,7 +11,7 @@ import { AppModule } from '@/app.module';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,
-      secret: 'secretKey',
+      secret: 'sociabot2024',
     }),
   ],
   controllers: [AuthController],
