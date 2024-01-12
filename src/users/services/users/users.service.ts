@@ -9,8 +9,18 @@ export class UsersService {
 
   async create(data: CreateUserDto) {
     try {
+      const user = await this.db.user.findFirst({
+        where: { email: data.email },
+      });
+
+      if (user) {
+        throw new BadRequestException('El usuario ya existe');
+      }
+      
       data.password = hashSync(data.password, 10)
-      return await this.db.user.create({ data });
+      await this.db.user.create({ data });
+
+      return { message: 'Usuario creado correctamente' };
     } catch (err) {
       console.log(err);
       throw new BadRequestException('No se puede crear el usuario');

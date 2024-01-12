@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { UsersService } from '@/users/services/users/users.service';
 import { CreateUserDto } from '@/users/dtos/UsersDtos';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('users')
 @ApiTags('users')
@@ -10,8 +10,8 @@ export class UsersController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Crear un usuario', description: 'Crea un usuario: el género debe ser "MALE" o "FEMALE" y el rol "TEACHER" o "STUDENT"' })
   async create(@Body() body: CreateUserDto) {
-    console.log(body);
     return this.usersService.create(body);
   }
 }
