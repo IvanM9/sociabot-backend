@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from '@/users/dtos/UsersDtos';
+import { CreateUserDto, UpdateUserDto } from '@/users/dtos/UsersDtos';
 import { PrismaService } from '@/prisma.service';
 import { hashSync } from 'bcrypt';
 
@@ -36,5 +36,21 @@ export class UsersService {
         gender: true,
       },
     }).catch((error) => { throw new NotFoundException(`Error al obtener el usuario`) });
+  }
+
+  async updateProfile(id: string, data: UpdateUserDto) {
+    const user = await this.db.user.findUniqueOrThrow({ where: { id } }).catch((error) => { throw new NotFoundException(`Error al obtener el usuario`) });
+
+    await this.db.user.update({ where: { id }, data }).catch((error) => { throw new BadRequestException(`Error al actualizar el usuario`) });
+
+    return { message: 'Usuario actualizado correctamente' };
+  }
+
+  async updateStatus(id: string) {
+    const user = await this.db.user.findUniqueOrThrow({ where: { id } }).catch((error) => { throw new NotFoundException(`Error al obtener el usuario`) });
+
+    await this.db.user.update({ where: { id }, data: { status: !user.status } }).catch((error) => { throw new BadRequestException(`Error al actualizar el usuario`) });
+
+    return { message: 'Usuario actualizado correctamente' };
   }
 }
