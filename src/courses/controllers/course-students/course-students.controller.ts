@@ -7,6 +7,7 @@ import { RoleEnum } from '@/security/jwt-strategy/role.enum';
 import { Role } from '@/security/jwt-strategy/roles.decorator';
 import { RoleGuard } from '@/security/jwt-strategy/roles.guard';
 import { ResponseHttpInterceptor } from '@/shared/interceptors/response-http.interceptor';
+import { ParseStatusPipe } from '@/users/pipes/parse-status.pipe';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Body, Controller, Get, Param, ParseBoolPipe, Patch, Post, Query, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
@@ -35,10 +36,8 @@ export class CourseStudentsController {
     @Role(RoleEnum.TEACHER)
     @ApiQuery({ name: 'status', required: false })
     @ApiOperation({ summary: 'Obtener los estudiantes de un curso' })
-    async getStudentsByCourse(@Param('courseId') id: string, @Query('status') status: boolean) {
-        status = String(status) == "false" || undefined ? false : true;
+    async getStudentsByCourse(@Param('courseId') id: string, @Query('status', ParseStatusPipe) status: boolean) {
         const data =  await this.service.listStudentsByCourse(id, status);
-
         return { data, message: 'Estudiantes encontrados' };
     }
 
@@ -46,10 +45,8 @@ export class CourseStudentsController {
     @Role(RoleEnum.STUDENT)
     @ApiQuery({ name: 'status', required: false })
     @ApiOperation({ summary: 'Obtener los cursos de un estudiante' })
-    async getCoursesByStudent(@CurrentUser() {id}: InfoUserInterface, @Query('status') status: boolean) {
-        status = String(status) == "false" || undefined ? false : true;
+    async getCoursesByStudent(@CurrentUser() {id}: InfoUserInterface, @Query('status', ParseStatusPipe) status: boolean) {
         const data =  await this.service.listCoursesByStudent(id, status);
-
         return { data, message: 'Cursos encontrados' };
     }
 
