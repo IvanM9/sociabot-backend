@@ -8,7 +8,6 @@ export class UsersService {
   constructor(private db: PrismaService) {}
 
   async create(data: CreateUserDto) {
-    try {
       const user = await this.db.user.findFirst({
         where: { email: data.email },
       });
@@ -16,14 +15,10 @@ export class UsersService {
       if (user) {
         throw new BadRequestException('El usuario ya existe');
       }
-      
+
       data.password = hashSync(data.password, 10)
-      await this.db.user.create({ data });
+      await this.db.user.create({ data }).catch((error) => { throw new BadRequestException(`Error al crear el usuario`)});
 
       return { message: 'Usuario creado correctamente' };
-    } catch (err) {
-      console.log(err);
-      throw new BadRequestException('No se puede crear el usuario');
-    }
   }
 }

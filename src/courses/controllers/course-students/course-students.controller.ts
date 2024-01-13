@@ -1,7 +1,7 @@
 import { CreateCourseStudentsDto } from '@/courses/dtos/course-students.dto';
 import { CourseStudentsService } from '@/courses/services/course-students/course-students.service';
-import { Body, Controller, Param, Patch, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, ParseBoolPipe, Patch, Post, Query } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @Controller('course-students')
 @ApiTags('course-students')
@@ -18,6 +18,26 @@ export class CourseStudentsController {
     @ApiOperation({ summary: 'Activar o desactivar un estudiante de un curso' })
     async changeStatus(@Param('studentId') studentId: string, @Param('courseId') courseId: string) {
         return await this.service.changeStatus({ studentId, courseId });
+    }
+
+    @Get(':courseId/students')
+    @ApiQuery({ name: 'status', required: false })
+    @ApiOperation({ summary: 'Obtener los estudiantes de un curso' })
+    async getStudentsByCourse(@Param('courseId') id: string, @Query('status') status: boolean) {
+        status = String(status) == "false" || undefined ? false : true;
+        const data =  await this.service.listStudentsByCourse(id, status);
+
+        return { data, message: 'Estudiantes encontrados' };
+    }
+
+    @Get(':studentId/courses')
+    @ApiQuery({ name: 'status', required: false })
+    @ApiOperation({ summary: 'Obtener los cursos de un estudiante' })
+    async getCoursesByStudents(@Param('studentId') id: string, @Query('status') status: boolean) {
+        status = String(status) == "false" || undefined ? false : true;
+        const data =  await this.service.listCoursesByStudent(id, status);
+
+        return { data, message: 'Cursos encontrados' };
     }
 
 }

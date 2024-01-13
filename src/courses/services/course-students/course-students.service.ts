@@ -1,5 +1,6 @@
 import { CreateCourseStudentsDto } from '@/courses/dtos/course-students.dto';
 import { PrismaService } from '@/prisma.service';
+import { RoleEnum } from '@/security/jwt-strategy/role.enum';
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -10,6 +11,10 @@ export class CourseStudentsService {
         const { id } = await this.db.course.findUniqueOrThrow({
             where: { code: data.courseCode },
         }).catch(() => { throw new BadRequestException('Courso encontrado'); });
+
+        await this.db.user.findUniqueOrThrow({
+            where: { email: data.studentId, role: RoleEnum.STUDENT },
+        }).catch(() => { throw new BadRequestException('Estudiante no encontrado'); });
 
         const courseStudent = await this.db.courseStudent.findFirst({
             where: {
@@ -60,5 +65,68 @@ export class CourseStudentsService {
         }).catch(() => { throw new BadRequestException(`Error al ${!courseStudent.status ? 'activar' : 'desactivar'} el estudiante de este curso`); });
 
         return { message: 'Estado del curso cambiado correctamente' };
+    }
+
+    async listStudentsByCourse(courseId: string, status: boolean) {
+        const { id } = await this.db.course.findUniqueOrThrow({
+            where: { id: courseId },
+        }).catch(() => { throw new BadRequestException('Curso no encontrado'); });
+
+        const courseStudents = await this.db.courseStudent.findMany({
+            where: {
+                courseId: id,
+                status,
+            },
+            select: {
+                student: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                        gender: true,
+                        birthDate: true,
+                    },
+                },
+                id: true,
+            },
+        });
+
+        return courseStudents;
+    }
+
+    async listCoursesByStudent(studentId: string, status: boolean) {
+        const { id } = await this.db.user.findUniqueOrThrow({
+            where: { id: studentId, role: RoleEnum.STUDENT },
+        }).catch(() => { throw new BadRequestException('Estudiante no encontrado'); });
+
+        const courseStudents = await this.db.courseStudent.findMany({
+            where: {
+                studentId: id,
+                status,
+                course: {
+                    status: true,
+                }
+            },
+            select: {
+                course: {
+                    select: {
+                        id: true,
+                        name: true,
+                        description: true,
+                        teacher: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                            },
+                        }
+                    },
+                },
+                id: true,
+            },
+        });
+
+        return courseStudents;
     }
 }
