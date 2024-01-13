@@ -89,6 +89,8 @@ export class CourseStudentsService {
                     },
                 },
                 id: true,
+                createdAt: true,
+                updatedAt: true,
             },
         });
 

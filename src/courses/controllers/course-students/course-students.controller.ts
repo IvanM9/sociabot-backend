@@ -1,10 +1,13 @@
 import { CreateCourseStudentsDto } from '@/courses/dtos/course-students.dto';
 import { CourseStudentsService } from '@/courses/services/course-students/course-students.service';
-import { Body, Controller, Get, Param, ParseBoolPipe, Patch, Post, Query } from '@nestjs/common';
+import { ResponseHttpInterceptor } from '@/shared/interceptors/response-http.interceptor';
+import { CacheInterceptor } from '@nestjs/cache-manager';
+import { Body, Controller, Get, Param, ParseBoolPipe, Patch, Post, Query, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @Controller('course-students')
 @ApiTags('course-students')
+@UseInterceptors(ResponseHttpInterceptor, CacheInterceptor)
 export class CourseStudentsController {
     constructor(private service: CourseStudentsService) { }
 
