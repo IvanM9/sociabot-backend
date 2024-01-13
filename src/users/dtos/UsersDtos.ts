@@ -1,6 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { RoleEnum } from '@/security/jwt-strategy/role.enum';
 import { IsDateString, IsEmail, IsEnum, IsString, IsStrongPassword, Length } from 'class-validator';
+import { GenderEnum } from '../enums/genders.enum';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -8,10 +9,19 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty()
-  @IsString()
-  @Length(6, 20)
-  // @IsStrongPassword({ minLength: 5, minLowercase: 1, minUppercase: 1, minNumbers: 1 },
-  //   { message: 'La contraseña debe tener al menos 6 caracteres, 1 mayúscula, 1 minúscula y 1 número' })
+  @IsStrongPassword(
+    {
+      minLength: 6,
+      minLowercase: 1,
+      minUppercase: 1,
+      minNumbers: 1,
+      minSymbols: 0,
+    },
+    {
+      message:
+        'La contraseña debe tener al menos 6 caracteres, una letra mayúscula, una letra minúscula y un número',
+    },
+  )
   password: string;
 
   @ApiProperty({ enum: RoleEnum })
@@ -27,7 +37,12 @@ export class CreateUserDto {
   lastName: string;
 
   @ApiProperty({ type: Date })
-  @IsDateString()
-  birthDate: Date;
+  @IsDateString({ strict: true })
+  birthDate: string;
 
+  @ApiProperty({ enum: GenderEnum })
+  @IsEnum(GenderEnum)
+  gender: string;
 }
+
+export class UpdateUserDto extends OmitType(CreateUserDto,['email', 'role', 'password']) {}

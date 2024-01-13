@@ -17,20 +17,21 @@ model User {
   email     String   @unique
   password  String
   birthDate DateTime @db.Date
-  createdAt DateTime @default(now()) @db.Timestamptz()
-  updatedAt DateTime @updatedAt @db.Timestamptz()
+  gender    String
+  createdAt DateTime? @default(now()) @db.Timestamptz()
+  updatedAt DateTime? @updatedAt @db.Timestamptz()
   role      String   @default("STUDENT") // STUDENT, TEACHER
   status    Boolean  @default(true)
 
   courses        Course[]
-  studentCourses Course_Student[]
+  studentCourses CourseStudent[]
 
   @@map("users")
 }
 
 model Lesson {
   id              String         @id @default(cuid())
-  courseStudent   Course_Student @relation(fields: [courseStudentId], references: [id])
+  courseStudent   CourseStudent @relation(fields: [courseStudentId], references: [id])
   courseStudentId String
   score           Int
   date            DateTime       @db.Timestamptz()
@@ -51,7 +52,7 @@ model Module {
   createdBy String
   updatedBy String
   createdAt DateTime @default(now()) @db.Timestamptz()
-  updatedAt DateTime @db.Timestamptz()
+  updatedAt DateTime @db.Timestamptz() @updatedAt
   course    Course   @relation(fields: [courseId], references: [id])
   courseId  String
   status    Boolean  @default(true)
@@ -66,13 +67,13 @@ model Module {
 model Chat {
   id              String         @id @default(cuid())
   date            DateTime
-  courseStudent   Course_Student @relation(fields: [courseStudentId], references: [id])
+  courseStudent   CourseStudent @relation(fields: [courseStudentId], references: [id])
   courseStudentId String
-  observations    String         @db.Text
-  updatedBy       String
-  createdAt       DateTime       @default(now()) @db.Timestamptz()
-  updatedAt       DateTime       @db.Timestamptz()
-  createdBy       String
+  observations    String?         @db.Text
+  updatedBy       String?
+  createdAt       DateTime?       @default(now()) @db.Timestamptz()
+  updatedAt       DateTime?       @db.Timestamptz() @updatedAt
+  createdBy       String?
   module          Module         @relation(fields: [moduleId], references: [id])
   moduleId        String
 
@@ -95,30 +96,31 @@ model Interaction {
 model Course {
   id          String   @id @default(cuid())
   name        String
-  description String
+  code        String   @unique 
+  description String? @db.Text
   teacher     User     @relation(fields: [createdBy], references: [id])
   createdBy   String
-  updatedBy   String
-  createdAt   DateTime @default(now()) @db.Timestamptz()
-  updatedAt   DateTime @db.Timestamptz()
+  updatedBy   String?
+  createdAt   DateTime? @default(now()) @db.Timestamptz()
+  updatedAt   DateTime? @db.Timestamptz() @updatedAt
   status      Boolean  @default(true)
 
   modules  Module[]
-  students Course_Student[]
+  students CourseStudent[]
 
   @@map("courses")
 }
 
-model Course_Student {
+model CourseStudent {
   id        String   @id @default(cuid())
   course    Course   @relation(fields: [courseId], references: [id])
   courseId  String
   student   User     @relation(fields: [studentId], references: [id])
   studentId String
-  createdBy String
-  updatedBy String
-  createdAt DateTime @default(now()) @db.Timestamptz()
-  updatedAt DateTime @db.Timestamptz()
+  createdBy String?
+  updatedBy String?
+  createdAt DateTime? @default(now()) @db.Timestamptz()
+  updatedAt DateTime? @db.Timestamptz() @updatedAt
   status    Boolean  @default(true)
 
   lessons Lesson[]

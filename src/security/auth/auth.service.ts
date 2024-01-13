@@ -14,7 +14,6 @@ export class AuthService {
     const user = await this.db.user.findUniqueOrThrow({
       where: { email: payload.email },
     }).catch(() => { throw new UnauthorizedException('Usuario no encontrado'); });
-    console.log(user)
 
     if (!user.status)
       throw new UnauthorizedException('El usuario se encuentra desactivado');

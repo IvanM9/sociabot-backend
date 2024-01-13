@@ -1,7 +1,7 @@
 import { RoleEnum } from './role.enum';
 
 export interface InfoUserInterface {
-  id: number;
+  id: string;
   email: string;
   role: RoleEnum;
 }
