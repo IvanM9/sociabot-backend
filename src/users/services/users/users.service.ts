@@ -5,21 +5,21 @@ import { hashSync } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  constructor(private db: PrismaService) {}
+  constructor(private db: PrismaService) { }
 
   async create(data: CreateUserDto) {
-      const user = await this.db.user.findFirst({
-        where: { email: data.email },
-      });
+    const user = await this.db.user.findFirst({
+      where: { email: data.email },
+    });
 
-      if (user) {
-        throw new BadRequestException('El usuario ya existe');
-      }
+    if (user) {
+      throw new BadRequestException('El usuario ya existe');
+    }
 
-      data.password = hashSync(data.password, 10)
-      await this.db.user.create({ data }).catch((error) => {console.log(error); throw new BadRequestException(`Error al crear el usuario`); });
+    data.password = hashSync(data.password, 10)
+    await this.db.user.create({ data }).catch((error) => { console.log(error); throw new BadRequestException(`Error al crear el usuario`); });
 
-      return { message: 'Usuario creado correctamente' };
+    return { message: 'Usuario creado correctamente' };
   }
 
   async getProfile(id: string) {
@@ -35,6 +35,6 @@ export class UsersService {
         birthDate: true,
         gender: true,
       },
-    }).catch((error) => { throw new NotFoundException(`Error al obtener el usuario`)});
+    }).catch((error) => { throw new NotFoundException(`Error al obtener el usuario`) });
   }
 }
