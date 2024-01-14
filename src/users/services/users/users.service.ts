@@ -21,7 +21,7 @@ export class UsersService {
     }
 
     data.password = hashSync(data.password, 10);
-    await this.db.user.create({ data }).catch((error) => {
+    await this.db.user.create({ data }).catch(() => {
       throw new BadRequestException(`Error al crear el usuario`);
     });
 
@@ -43,19 +43,17 @@ export class UsersService {
           gender: true,
         },
       })
-      .catch((error) => {
+      .catch(() => {
         throw new NotFoundException(`Error al obtener el usuario`);
       });
   }
 
   async updateProfile(id: string, data: UpdateUserDto) {
-    const user = await this.db.user
-      .findUniqueOrThrow({ where: { id } })
-      .catch((error) => {
-        throw new NotFoundException(`Error al obtener el usuario`);
-      });
+    await this.db.user.findUniqueOrThrow({ where: { id } }).catch(() => {
+      throw new NotFoundException(`Error al obtener el usuario`);
+    });
 
-    await this.db.user.update({ where: { id }, data }).catch((error) => {
+    await this.db.user.update({ where: { id }, data }).catch(() => {
       throw new BadRequestException(`Error al actualizar el usuario`);
     });
 
@@ -65,13 +63,13 @@ export class UsersService {
   async updateStatus(id: string) {
     const user = await this.db.user
       .findUniqueOrThrow({ where: { id } })
-      .catch((error) => {
+      .catch(() => {
         throw new NotFoundException(`Error al obtener el usuario`);
       });
 
     await this.db.user
       .update({ where: { id }, data: { status: !user.status } })
-      .catch((error) => {
+      .catch(() => {
         throw new BadRequestException(`Error al actualizar el usuario`);
       });
 
