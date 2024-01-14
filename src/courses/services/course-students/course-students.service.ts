@@ -10,7 +10,7 @@ export class CourseStudentsService {
     async joinCourse(data: CreateCourseStudentsDto) {
         const { id } = await this.db.course.findUniqueOrThrow({
             where: { code: data.courseCode },
-        }).catch(() => { throw new BadRequestException('Courso encontrado'); });
+        }).catch(() => { throw new BadRequestException('Curso no encontrado'); });
 
         await this.db.user.findUniqueOrThrow({
             where: { email: data.studentId, role: RoleEnum.STUDENT },
