@@ -7,7 +7,7 @@ import { RoleEnum } from '@/security/jwt-strategy/role.enum';
 import { Role } from '@/security/jwt-strategy/roles.decorator';
 import { RoleGuard } from '@/security/jwt-strategy/roles.guard';
 import { ResponseHttpInterceptor } from '@/shared/interceptors/response-http.interceptor';
-import { ParseStatusPipe } from '@/users/pipes/parse-status.pipe';
+import { ParseStatusPipe } from '@/shared/pipes/parse-status.pipe';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   Body,

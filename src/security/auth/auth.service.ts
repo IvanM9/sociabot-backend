@@ -11,9 +11,13 @@ export class AuthService {
     private db: PrismaService,
   ) {}
   async login(payload: LoginDto) {
-    const user = await this.db.user.findUniqueOrThrow({
-      where: { email: payload.email },
-    }).catch(() => { throw new UnauthorizedException('Usuario no encontrado'); });
+    const user = await this.db.user
+      .findUniqueOrThrow({
+        where: { email: payload.email },
+      })
+      .catch(() => {
+        throw new UnauthorizedException('Usuario no encontrado');
+      });
 
     if (!user.status)
       throw new UnauthorizedException('El usuario se encuentra desactivado');
