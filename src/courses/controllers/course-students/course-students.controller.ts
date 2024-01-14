@@ -35,9 +35,16 @@ import {
 export class CourseStudentsController {
   constructor(private service: CourseStudentsService) {}
 
-  @Post()
+  @Post('join')
   @ApiOperation({ summary: 'Inscribir un estudiante a un curso' })
-  async joinCourse(@Body() body: CreateCourseStudentsDto) {
+  async joinCourse(
+    @Body() body: CreateCourseStudentsDto,
+    @CurrentUser() user: InfoUserInterface,
+  ) {
+    if (user.role === RoleEnum.STUDENT) {
+      body.studentId = user.id;
+    }
+
     return await this.service.joinCourse(body);
   }
 
