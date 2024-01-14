@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Patch, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from '@/users/services/users/users.service';
 import { CreateUserDto, UpdateUserDto } from '@/users/dtos/UsersDtos';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -13,19 +21,22 @@ import { RoleEnum } from '@/security/jwt-strategy/role.enum';
 @Controller('users')
 @ApiTags('users')
 @UseInterceptors(ResponseHttpInterceptor)
-@UseGuards(JwtAuthGuard, RoleGuard)
 @ApiBearerAuth()
 export class UsersController {
-  constructor(private usersService: UsersService) {
-  }
+  constructor(private usersService: UsersService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Crear un usuario', description: 'Crea un usuario: el género debe ser "MALE" o "FEMALE" y el rol "TEACHER" o "STUDENT"' })
+  @ApiOperation({
+    summary: 'Crear un usuario',
+    description:
+      'Crea un usuario: el género debe ser "MALE" o "FEMALE" y el rol "TEACHER" o "STUDENT"',
+  })
   async create(@Body() body: CreateUserDto) {
     return this.usersService.create(body);
   }
 
   @Get('profile')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Role(RoleEnum.STUDENT, RoleEnum.TEACHER)
   @ApiOperation({ summary: 'Obtener perfil de usuario' })
   async getProfile(@CurrentUser() { id }: InfoUserInterface) {
@@ -34,13 +45,18 @@ export class UsersController {
 
   @Patch('update')
   @Role(RoleEnum.STUDENT, RoleEnum.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @ApiOperation({ summary: 'Actualizar perfil de usuario' })
-  async updateProfile(@CurrentUser() { id }: InfoUserInterface, @Body() body: UpdateUserDto) {
+  async updateProfile(
+    @CurrentUser() { id }: InfoUserInterface,
+    @Body() body: UpdateUserDto,
+  ) {
     return this.usersService.updateProfile(id, body);
   }
 
   @Patch('status')
   @Role(RoleEnum.STUDENT, RoleEnum.TEACHER)
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @ApiOperation({ summary: 'Activar o desactivar mi usuario' })
   async updateStatus(@Body('id') id: string) {
     return this.usersService.updateStatus(id);
