@@ -1,13 +1,18 @@
 import { CreateCourseStudentsDto } from '@/courses/dtos/course-students.dto';
 import { PrismaService } from '@/prisma.service';
 import { RoleEnum } from '@/security/jwt-strategy/role.enum';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 @Injectable()
 export class CourseStudentsService {
   constructor(private db: PrismaService) {}
 
   async joinCourse(data: CreateCourseStudentsDto) {
+    console.log(data);
     const { id } = await this.db.course
       .findUniqueOrThrow({
         where: { code: data.courseCode },
@@ -17,11 +22,11 @@ export class CourseStudentsService {
       });
 
     await this.db.user
-      .findUniqueOrThrow({
-        where: { email: data.studentId, role: RoleEnum.STUDENT },
+      .findFirstOrThrow({
+        where: { id: data.studentId, role: RoleEnum.STUDENT },
       })
       .catch(() => {
-        throw new BadRequestException('Estudiante no encontrado');
+        throw new NotFoundException('Estudiante no encontrado');
       });
 
     const courseStudent = await this.db.courseStudent.findFirst({
