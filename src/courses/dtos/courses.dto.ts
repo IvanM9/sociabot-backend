@@ -8,10 +8,6 @@ export class CreateCoursesDto {
 
   @ApiProperty()
   @IsString()
-  code: string;
-
-  @ApiProperty()
-  @IsString()
   description: string;
 }
 

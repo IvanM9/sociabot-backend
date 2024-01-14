@@ -2,6 +2,7 @@ import { UpdateCoursesDto } from './../../dtos/courses.dto';
 import { CreateCoursesDto } from '@/courses/dtos/courses.dto';
 import { PrismaService } from '@/prisma.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
+import generateLicenseKey from '@mcnaveen/license-gen';
 
 @Injectable()
 export class CoursesService {
@@ -9,17 +10,9 @@ export class CoursesService {
 
   async createCourse(dataCourse: CreateCoursesDto, userId: string) {
     await this.db.course
-      .findUniqueOrThrow({
-        where: { code: dataCourse.code },
-      })
-      .catch(() => {
-        throw new BadRequestException('Código ya se encuentra en uso');
-      });
-
-    await this.db.course
       .create({
         data: {
-          code: dataCourse.code,
+          code: generateLicenseKey(10, 5),
           name: dataCourse.name,
           description: dataCourse.description,
           createdBy: userId,
@@ -54,16 +47,15 @@ export class CoursesService {
     const courses = await this.db.course.findMany({
       where: {
         createdBy: userId,
-        status,
+        status: status,
       },
       select: {
         name: true,
         description: true,
-        status: true,
         code: true,
         id: true,
+        status: true,
         createdAt: true,
-        updatedAt: true,
       },
     });
     return courses;

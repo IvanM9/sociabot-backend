@@ -1,6 +1,12 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { RoleEnum } from '@/security/jwt-strategy/role.enum';
-import { IsDateString, IsEmail, IsEnum, IsString, IsStrongPassword, Length } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsEnum,
+  IsString,
+  IsStrongPassword,
+} from 'class-validator';
 import { GenderEnum } from '../enums/genders.enum';
 
 export class CreateUserDto {
@@ -45,4 +51,8 @@ export class CreateUserDto {
   gender: string;
 }
 
-export class UpdateUserDto extends OmitType(CreateUserDto,['email', 'role', 'password']) {}
+export class UpdateUserDto extends OmitType(CreateUserDto, [
+  'email',
+  'role',
+  'password',
+]) {}

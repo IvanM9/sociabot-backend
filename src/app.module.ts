@@ -10,7 +10,14 @@ import { SharedModule } from './shared/shared.module';
 import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
-  imports: [SecurityModule, UsersModule, BotModule, CoursesModule, SharedModule, CacheModule.register({ isGlobal: true })],
+  imports: [
+    SecurityModule,
+    UsersModule,
+    BotModule,
+    CoursesModule,
+    SharedModule,
+    CacheModule.register({ isGlobal: true }),
+  ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
   exports: [PrismaService],
