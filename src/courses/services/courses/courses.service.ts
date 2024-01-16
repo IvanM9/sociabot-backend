@@ -25,24 +25,6 @@ export class CoursesService {
     return { message: 'Creado correctamente' };
   }
 
-  async listAllCoursesByStatus(status: boolean) {
-    const courses = await this.db.course.findMany({
-      where: {
-        status,
-      },
-      select: {
-        name: true,
-        description: true,
-        status: true,
-        code: true,
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-    return courses;
-  }
-
   async listMyCoursesByStatus(userId: string, status: boolean) {
     const courses = await this.db.course.findMany({
       where: {
