@@ -35,11 +35,11 @@ export class UsersService {
         select: {
           id: true,
           email: true,
-          firstName: true,
-          lastName: true,
-          createdAt: true,
-          updatedAt: true,
-          birthDate: true,
+          first_name: true,
+          last_name: true,
+          created_at: true,
+          updated_at: true,
+          birth_date: true,
           gender: true,
         },
       })

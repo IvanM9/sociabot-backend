@@ -31,8 +31,8 @@ export class CourseStudentsService {
 
     const courseStudent = await this.db.courseStudent.findFirst({
       where: {
-        studentId: data.studentId,
-        courseId: id,
+        student_id: data.studentId,
+        course_id: id,
       },
     });
 
@@ -43,8 +43,8 @@ export class CourseStudentsService {
     await this.db.courseStudent
       .create({
         data: {
-          student: { connect: { id: data.studentId } },
-          course: { connect: { id } },
+          users: { connect: { id: data.studentId } },
+          courses: { connect: { id } },
         },
       })
       .catch(() => {
@@ -65,8 +65,8 @@ export class CourseStudentsService {
 
     const courseStudent = await this.db.courseStudent.findFirst({
       where: {
-        studentId: data.studentId,
-        courseId: id,
+        student_id: data.studentId,
+        course_id: id,
       },
     });
 
@@ -105,23 +105,23 @@ export class CourseStudentsService {
 
     const courseStudents = await this.db.courseStudent.findMany({
       where: {
-        courseId: id,
+        course_id: id,
         status,
       },
       select: {
-        student: {
+        users: {
           select: {
             id: true,
-            firstName: true,
-            lastName: true,
+            first_name: true,
+            last_name: true,
             email: true,
             gender: true,
-            birthDate: true,
+            birth_date: true,
           },
         },
         id: true,
-        createdAt: true,
-        updatedAt: true,
+        created_at: true,
+        updated_at: true,
       },
     });
 
@@ -139,22 +139,22 @@ export class CourseStudentsService {
 
     const courseStudents = await this.db.courseStudent.findMany({
       where: {
-        studentId: id,
+        student_id: id,
         status,
-        course: {
+        courses: {
           status: true,
         },
       },
       select: {
-        course: {
+        courses: {
           select: {
             id: true,
             name: true,
             description: true,
-            teacher: {
+            users: {
               select: {
-                firstName: true,
-                lastName: true,
+                first_name: true,
+                last_name: true,
                 email: true,
               },
             },

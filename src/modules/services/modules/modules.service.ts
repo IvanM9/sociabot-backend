@@ -26,10 +26,10 @@ export class ModulesService {
         data: {
           name: dataModule.name,
           goals: dataModule.goals,
-          course: { connect: { id: course.id } },
-          isPublic: dataModule.isPublic,
-          updatedBy: userId,
-          createdBy: userId,
+          courses: { connect: { id: course.id } },
+          is_public: dataModule.isPublic,
+          updated_by: userId,
+          created_by: userId,
         },
       })
       .catch(() => {
@@ -42,7 +42,7 @@ export class ModulesService {
   async getModulesByCourse(courseId: string) {
     const modules = await this.db.module.findMany({
       where: {
-        courseId: courseId,
+        course_id: courseId,
       },
     });
     if (!modules.length) {
@@ -69,8 +69,8 @@ export class ModulesService {
         },
         data: {
           status: !module.status,
-          updatedAt: new Date(),
-          updatedBy: data.userId,
+          updated_at: new Date(),
+          updated_by: data.userId,
         },
       })
       .catch(() => {
@@ -103,9 +103,9 @@ export class ModulesService {
           id: moduleId,
         },
         data: {
-          courseId: newCourseId,
-          updatedAt: new Date(),
-          updatedBy: userId,
+          course_id: newCourseId,
+          updated_at: new Date(),
+          updated_by: userId,
         },
       })
       .catch(() => {
@@ -136,9 +136,9 @@ export class ModulesService {
         data: {
           name: data.module.name,
           goals: data.module.goals,
-          isPublic: data.module.isPublic,
-          updatedBy: data.userId,
-          updatedAt: new Date(),
+          is_public: data.module.isPublic,
+          updated_by: data.userId,
+          updated_at: new Date(),
         },
       })
       .catch(() => {
