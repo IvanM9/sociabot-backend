@@ -1,4 +1,4 @@
-import { CreateModulesDto, UpdateModulesDto } from '@/modules/dtos/modules.dto';
+import { CreateModulesDto, UpdateModulesDto } from '@/courses/dtos/modules.dto';
 import { PrismaService } from '@/prisma.service';
 import {
   BadRequestException,

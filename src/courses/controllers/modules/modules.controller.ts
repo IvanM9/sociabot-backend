@@ -1,6 +1,6 @@
 import { CreateCoursesDto } from '@/courses/dtos/courses.dto';
-import { CreateModulesDto, UpdateModulesDto } from '@/modules/dtos/modules.dto';
-import { ModulesService } from '@/modules/services/modules/modules.service';
+import { CreateModulesDto, UpdateModulesDto } from '@/courses/dtos/modules.dto';
+import { ModulesService } from '@/courses/services/modules/modules.service';
 import { CurrentUser } from '@/security/jwt-strategy/auth.decorator';
 import { InfoUserInterface } from '@/security/jwt-strategy/info-user.interface';
 import { JwtAuthGuard } from '@/security/jwt-strategy/jwt-auth.guard';
