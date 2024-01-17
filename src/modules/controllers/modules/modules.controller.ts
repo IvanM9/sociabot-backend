@@ -95,8 +95,25 @@ export class ModulesController {
 
   @Get(':courseId')
   @Role(RoleEnum.TEACHER)
+  @ApiQuery({ name: 'status', required: false })
   @ApiOperation({ summary: 'Obtener módulos por curso' })
-  async getModulesByCourse(@Param('courseId') courseId: string) {
-    return await this.service.getModulesByCourse(courseId);
+  async getModulesByCourse(
+    @Param('courseId') courseId: string,
+    @Query('status', ParseStatusPipe) status: boolean,
+  ) {
+    const data = await this.service.getModulesByCourse(courseId, status);
+    return { data, message: 'Módulos encontrados' };
+  }
+
+  @Get()
+  @Role(RoleEnum.TEACHER)
+  @ApiQuery({ name: 'status', required: false })
+  @ApiOperation({ summary: 'Obtener módulos por usuario ' })
+  async getModulesByUser(
+    @CurrentUser() { id }: InfoUserInterface,
+    @Query('status', ParseStatusPipe) status: boolean,
+  ) {
+    const data = await this.service.listUserModules(id, status);
+    return { data, message: 'Módulos encontrados' };
   }
 }

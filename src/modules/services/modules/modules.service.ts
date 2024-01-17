@@ -39,10 +39,28 @@ export class ModulesService {
     return { message: 'Módulo creado correctamente' };
   }
 
-  async getModulesByCourse(courseId: string) {
+  async getModulesByCourse(courseId: string, status: boolean) {
     const modules = await this.db.module.findMany({
       where: {
         course_id: courseId,
+        status,
+      },
+      select: {
+        id: true,
+        name: true,
+        goals: true,
+        is_public: true,
+        status: true,
+        created_at: true,
+        updated_at: true,
+        courses: {
+          select: {
+            name: true,
+            id: true,
+            code: true,
+            status: true,
+          },
+        },
       },
     });
     if (!modules.length) {
@@ -111,6 +129,7 @@ export class ModulesService {
       .catch(() => {
         throw new BadRequestException('Módulo no encontrado');
       });
+    return { message: 'Módulo se cambio de curso correctamente' };
   }
 
   async updateModule(data: {
@@ -146,5 +165,31 @@ export class ModulesService {
       });
 
     return { message: 'Módulo actualizado correctamente' };
+  }
+
+  async listUserModules(userId: string, status: boolean) {
+    const modules = await this.db.module.findMany({
+      where: {
+        created_by: userId,
+        status,
+      },
+      select: {
+        name: true,
+        id: true,
+        goals: true,
+        courses: {
+          select: {
+            name: true,
+            id: true,
+            code: true,
+            status: true,
+          },
+        },
+        is_public: true,
+        status: true,
+        created_at: true,
+      },
+    });
+    return modules;
   }
 }
