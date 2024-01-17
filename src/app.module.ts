@@ -8,6 +8,7 @@ import { BotModule } from './bot/bot.module';
 import { CoursesModule } from './courses/courses.module';
 import { SharedModule } from './shared/shared.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     CoursesModule,
     SharedModule,
     CacheModule.register({ isGlobal: true }),
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
