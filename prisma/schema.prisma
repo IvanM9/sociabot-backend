@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,120 +8,130 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String   @unique
-  password  String
-  birthDate DateTime @db.Date
-  gender    String
-  createdAt DateTime? @default(now()) @db.Timestamptz()
-  updatedAt DateTime? @updatedAt @db.Timestamptz()
-  role      String   @default("STUDENT") // STUDENT, TEACHER
-  status    Boolean  @default(true)
-
-  courses        Course[]
-  studentCourses CourseStudent[]
+  id              String          @id @default(cuid())
+  first_name      String
+  last_name       String
+  email           String          @unique
+  password        String
+  birth_date      DateTime        @db.Date
+  gender          String
+  created_at      DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?       @db.Timestamptz(6)
+  role            Role            @default(STUDENT)
+  status          Boolean         @default(true)
+  course_students CourseStudent[]
+  courses         Course[]
 
   @@map("users")
 }
 
 model Lesson {
-  id              String         @id @default(cuid())
-  courseStudent   CourseStudent @relation(fields: [courseStudentId], references: [id])
-  courseStudentId String
-  score           Int
-  date            DateTime       @db.Timestamptz()
-  observations    String         @db.Text
-  module          Module         @relation(fields: [moduleId], references: [id])
-  moduleId        String
-  startDate       DateTime       @db.Timestamptz()
-  endDate         DateTime       @db.Timestamptz()
-  status          String         @default("PENDING") // PENDING, IN_PROGRESS, FINISHED
+  id                String        @id @default(cuid())
+  course_student_id String
+  score             Int
+  date              DateTime      @db.Timestamptz(6)
+  observations      String
+  module_id         String
+  start_date        DateTime      @db.Timestamptz(6)
+  end_date          DateTime      @db.Timestamptz(6)
+  status            LessonStatus  @default(PENDING)
+  course_students   CourseStudent @relation(fields: [course_student_id], references: [id])
+  modules           Module        @relation(fields: [module_id], references: [id])
 
   @@map("lessons")
 }
 
 model Module {
-  id        String   @id @default(cuid())
-  name      String
-  goals     String
-  createdBy String
-  updatedBy String
-  createdAt DateTime @default(now()) @db.Timestamptz()
-  updatedAt DateTime @db.Timestamptz() @updatedAt
-  course    Course   @relation(fields: [courseId], references: [id])
-  courseId  String
-  status    Boolean  @default(true)
-  isPublic  Boolean  @default(false)
-
-  lessons Lesson[]
-  chats   Chat[]
+  id         String    @id @default(cuid())
+  name       String
+  goals      String
+  created_by String
+  updated_by String?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  course_id  String
+  status     Boolean   @default(true)
+  is_public  Boolean   @default(false)
+  chats      Chat[]
+  lessons    Lesson[]
+  courses    Course    @relation(fields: [course_id], references: [id])
 
   @@map("modules")
 }
 
 model Chat {
-  id              String         @id @default(cuid())
-  date            DateTime
-  courseStudent   CourseStudent @relation(fields: [courseStudentId], references: [id])
-  courseStudentId String
-  observations    String?         @db.Text
-  updatedBy       String?
-  createdAt       DateTime?       @default(now()) @db.Timestamptz()
-  updatedAt       DateTime?       @db.Timestamptz() @updatedAt
-  createdBy       String?
-  module          Module         @relation(fields: [moduleId], references: [id])
-  moduleId        String
-
-  interactions Interaction[]
+  id                String        @id @default(cuid())
+  course_student_id String
+  observations      String?
+  updated_by        String?
+  created_at        DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?     @db.Timestamptz(6)
+  created_by        String?
+  module_id         String
+  course_students   CourseStudent @relation(fields: [course_student_id], references: [id])
+  modules           Module        @relation(fields: [module_id], references: [id])
+  interactions      Interaction[]
 
   @@map("chats")
 }
 
 model Interaction {
-  id      String   @id @default(cuid())
-  user    String   @default("STUDENT") // STUDENT, BOT
-  message String   @db.Text
-  date    DateTime @db.Timestamptz()
-  chat    Chat     @relation(fields: [chatId], references: [id])
-  chatId  String
+  id      String          @id @default(cuid())
+  user    InteractionUser @default(STUDENT)
+  message String
+  date    DateTime        @db.Timestamptz(6)
+  chat_id String
+  chats   Chat            @relation(fields: [chat_id], references: [id])
 
   @@map("interactions")
 }
 
 model Course {
-  id          String   @id @default(cuid())
-  name        String
-  code        String   @unique 
-  description String? @db.Text
-  teacher     User     @relation(fields: [createdBy], references: [id])
-  createdBy   String
-  updatedBy   String?
-  createdAt   DateTime? @default(now()) @db.Timestamptz()
-  updatedAt   DateTime? @db.Timestamptz() @updatedAt
-  status      Boolean  @default(true)
-
-  modules  Module[]
-  students CourseStudent[]
+  id              String          @id @default(cuid())
+  name            String
+  code            String          @unique
+  description     String?
+  created_by      String
+  updated_by      String?
+  created_at      DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?       @db.Timestamptz(6)
+  status          Boolean         @default(true)
+  course_students CourseStudent[]
+  users           User            @relation(fields: [created_by], references: [id])
+  modules         Module[]
 
   @@map("courses")
 }
 
 model CourseStudent {
-  id        String   @id @default(cuid())
-  course    Course   @relation(fields: [courseId], references: [id])
-  courseId  String
-  student   User     @relation(fields: [studentId], references: [id])
-  studentId String
-  createdBy String?
-  updatedBy String?
-  createdAt DateTime? @default(now()) @db.Timestamptz()
-  updatedAt DateTime? @db.Timestamptz() @updatedAt
-  status    Boolean  @default(true)
-
-  lessons Lesson[]
-  chats   Chat[]
+  id         String    @id @default(cuid())
+  course_id  String
+  student_id String
+  created_by String?
+  updated_by String?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  status     Boolean   @default(true)
+  chats      Chat[]
+  courses    Course    @relation(fields: [course_id], references: [id])
+  users      User      @relation(fields: [student_id], references: [id])
+  lessons    Lesson[]
 
   @@map("course_students")
+}
+
+enum InteractionUser {
+  STUDENT
+  BOT
+}
+
+enum LessonStatus {
+  PENDING
+  IN_PROGRESS
+  FINISHED
+}
+
+enum Role {
+  STUDENT
+  TEACHER
 }
