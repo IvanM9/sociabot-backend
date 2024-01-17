@@ -68,16 +68,7 @@ export class CoursesController {
     return { data, message: 'Cursos encontrados' };
   }
 
-  @Get()
-  @Role(RoleEnum.STUDENT)
-  @ApiQuery({ name: 'status', required: false })
-  @ApiOperation({ summary: 'Obtener todos los cursos' })
-  async getAllCourses(@Query('status', ParseStatusPipe) status: boolean) {
-    const data = await this.service.listAllCoursesByStatus(status);
-    return { data, message: 'Cursos encontrados' };
-  }
-
-  @Put()
+  @Put(':courseId')
   @Role(RoleEnum.TEACHER)
   @ApiOperation({ summary: 'Actualizar informacion de un curso' })
   async updateCourse(
