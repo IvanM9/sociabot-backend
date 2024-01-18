@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 import { ChatUser } from '../enums/chat-user.enum';
 
 export class CreateChatsDto {
@@ -15,9 +15,7 @@ export class CreateInteractionsDto {
   @IsString()
   chatId: string;
 
-  @ApiProperty({ enum: ChatUser })
-  @IsEnum(ChatUser)
-  user: ChatUser;
+  user?: ChatUser;
 
   @ApiProperty()
   @IsString()

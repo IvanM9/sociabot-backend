@@ -1,4 +1,5 @@
-import { CreateChatsDto } from '@/chats/dtos/chats.dto';
+import { CreateChatsDto, CreateInteractionsDto } from '@/chats/dtos/chats.dto';
+import { ChatUser } from '@/chats/enums/chat-user.enum';
 import { ChatsService } from '@/chats/services/chats/chats.service';
 import { CurrentUser } from '@/security/jwt-strategy/auth.decorator';
 import { InfoUserInterface } from '@/security/jwt-strategy/info-user.interface';
@@ -17,7 +18,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @Controller('chats')
 @ApiTags('chats')
@@ -29,6 +30,11 @@ export class ChatsController {
 
   @Post('create-chat')
   @Role(RoleEnum.STUDENT)
+  @ApiOperation({
+    summary: 'Crear un nuevo chat',
+    description:
+      'Crear un nuevo chat, en el cual el puede ser que la IA empiece la conversación o el estudiante',
+  })
   async createChat(
     @Body() data: CreateChatsDto,
     @CurrentUser() { id }: InfoUserInterface,
@@ -42,6 +48,9 @@ export class ChatsController {
   }
 
   @Get('get-chats/:moduleId')
+  @ApiOperation({
+    summary: 'Obtener los chats del usuario logueado en un módulo',
+  })
   @Role(RoleEnum.STUDENT)
   async getChats(
     @CurrentUser() { id }: InfoUserInterface,
@@ -53,10 +62,27 @@ export class ChatsController {
   }
 
   @Get('get-chat/:id')
+  @ApiOperation({
+    summary: 'Obtener un chat y sus mensajes por su id',
+  })
   @Role(RoleEnum.STUDENT)
   async getChat(@Param('id') id: string) {
     return {
       data: await this.service.getChat(id),
+    };
+  }
+
+  @Post('new-message')
+  @ApiOperation({
+    summary: 'Crear un nuevo mensaje en un chat',
+    description:
+      'Crear un nuevo mensaje en un chat, el dato devuelto es el mensaje respuesta de la IA',
+  })
+  @Role(RoleEnum.STUDENT)
+  async createInteraction(@Body() data: CreateInteractionsDto) {
+    data.user = ChatUser.STUDENT;
+    return {
+      data: await this.service.newMessage(data),
     };
   }
 }

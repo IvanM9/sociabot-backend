@@ -40,6 +40,9 @@ export class ChatsService {
             user: true,
             message: true,
           },
+          orderBy: {
+            date: 'asc',
+          },
         },
       },
     });
@@ -65,6 +68,8 @@ export class ChatsService {
         throw new NotFoundException(`Error al obtener el estudiante`);
       });
 
+    // TODO: Dependiendo de una valor random, la IA puede empezar la conversación
+
     return (
       await this.db.chat.create({
         data: {
@@ -77,12 +82,14 @@ export class ChatsService {
 
   async newMessage(data: CreateInteractionsDto) {
     const chat = await this.db.chat
-      .findUnique({
+      .findUniqueOrThrow({
         where: { id: data.chatId },
       })
       .catch(() => {
         throw new NotFoundException(`Error al obtener el chat`);
       });
+
+    // TODO: Devolver el mensaje generado por la IA
 
     return await this.db.interaction.create({
       data: {
