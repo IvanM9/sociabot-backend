@@ -39,7 +39,7 @@ export class CoursesController {
   @Post()
   @Role(RoleEnum.TEACHER)
   @ApiOperation({ summary: 'Crear un curso' })
-  async joinCourse(
+  async createCourse(
     @Body() body: CreateCoursesDto,
     @CurrentUser() { id }: InfoUserInterface,
   ) {
