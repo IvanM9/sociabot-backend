@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,11 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-enum Role {
-  STUDENT
-  TEACHER
 }
 
 model User {
@@ -32,12 +24,6 @@ model User {
   studentCourses CourseStudent[]
 
   @@map("users")
-}
-
-enum LessonStatus {
-  PENDING
-  IN_PROGRESS
-  FINISHED
 }
 
 model Lesson {
@@ -92,11 +78,6 @@ model Chat {
   @@map("chats")
 }
 
-enum InteractionUser {
-  STUDENT
-  BOT
-}
-
 model Interaction {
   id      String          @id @default(cuid())
   user    InteractionUser @default(STUDENT) // STUDENT, BOT
@@ -142,4 +123,20 @@ model CourseStudent {
   chats   Chat[]
 
   @@map("course_students")
+}
+
+enum InteractionUser {
+  STUDENT
+  BOT
+}
+
+enum LessonStatus {
+  PENDING
+  IN_PROGRESS
+  FINISHED
+}
+
+enum Role {
+  STUDENT
+  TEACHER
 }
