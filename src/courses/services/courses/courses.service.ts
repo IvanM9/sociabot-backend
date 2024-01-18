@@ -15,7 +15,7 @@ export class CoursesService {
           code: generateLicenseKey(10, 5),
           name: dataCourse.name,
           description: dataCourse.description,
-          created_by: userId,
+          createdBy: userId,
         },
       })
       .catch(() => {
@@ -28,7 +28,7 @@ export class CoursesService {
   async listMyCoursesByStatus(userId: string, status: boolean) {
     const courses = await this.db.course.findMany({
       where: {
-        created_by: userId,
+        createdBy: userId,
         status: status,
       },
       select: {
@@ -37,7 +37,7 @@ export class CoursesService {
         code: true,
         id: true,
         status: true,
-        created_at: true,
+        createdAt: true,
       },
     });
     return courses;
@@ -61,8 +61,8 @@ export class CoursesService {
         },
         data: {
           status: !course.status,
-          updated_at: new Date(),
-          updated_by: data.userId,
+          updatedAt: new Date(),
+          updatedBy: data.userId,
         },
       })
       .catch(() => {
@@ -97,8 +97,8 @@ export class CoursesService {
         data: {
           name: data.course.name,
           description: data.course.description,
-          updated_by: data.userId,
-          updated_at: new Date(),
+          updatedBy: data.userId,
+          updatedAt: new Date(),
         },
       })
       .catch(() => {

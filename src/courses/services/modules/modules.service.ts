@@ -26,10 +26,10 @@ export class ModulesService {
         data: {
           name: dataModule.name,
           goals: dataModule.goals,
-          courses: { connect: { id: course.id } },
-          is_public: dataModule.isPublic,
-          updated_by: userId,
-          created_by: userId,
+          course: { connect: { id: course.id } },
+          isPublic: dataModule.isPublic,
+          updatedBy: userId,
+          createdBy: userId,
         },
       })
       .catch(() => {
@@ -42,18 +42,18 @@ export class ModulesService {
   async getModulesByCourse(courseId: string, status: boolean) {
     const modules = await this.db.module.findMany({
       where: {
-        course_id: courseId,
+        courseId: courseId,
         status,
       },
       select: {
         id: true,
         name: true,
         goals: true,
-        is_public: true,
+        isPublic: true,
         status: true,
-        created_at: true,
-        updated_at: true,
-        courses: {
+        createdAt: true,
+        updatedAt: true,
+        course: {
           select: {
             name: true,
             id: true,
@@ -87,8 +87,8 @@ export class ModulesService {
         },
         data: {
           status: !module.status,
-          updated_at: new Date(),
-          updated_by: data.userId,
+          updatedAt: new Date(),
+          updatedBy: data.userId,
         },
       })
       .catch(() => {
@@ -121,9 +121,9 @@ export class ModulesService {
           id: moduleId,
         },
         data: {
-          course_id: newCourseId,
-          updated_at: new Date(),
-          updated_by: userId,
+          courseId: newCourseId,
+          updatedAt: new Date(),
+          updatedBy: userId,
         },
       })
       .catch(() => {
@@ -155,9 +155,9 @@ export class ModulesService {
         data: {
           name: data.module.name,
           goals: data.module.goals,
-          is_public: data.module.isPublic,
-          updated_by: data.userId,
-          updated_at: new Date(),
+          isPublic: data.module.isPublic,
+          updatedBy: data.userId,
+          updatedAt: new Date(),
         },
       })
       .catch(() => {
@@ -170,14 +170,14 @@ export class ModulesService {
   async listUserModules(userId: string, status: boolean) {
     const modules = await this.db.module.findMany({
       where: {
-        created_by: userId,
+        createdBy: userId,
         status,
       },
       select: {
         name: true,
         id: true,
         goals: true,
-        courses: {
+        course: {
           select: {
             name: true,
             id: true,
@@ -185,9 +185,9 @@ export class ModulesService {
             status: true,
           },
         },
-        is_public: true,
+        isPublic: true,
         status: true,
-        created_at: true,
+        createdAt: true,
       },
     });
     return modules;

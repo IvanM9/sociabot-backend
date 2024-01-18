@@ -36,15 +36,15 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsString()
-  first_name: string;
+  firstName: string;
 
   @ApiProperty()
   @IsString()
-  last_name: string;
+  lastName: string;
 
   @ApiProperty({ type: Date })
   @IsDateString({ strict: true })
-  birth_date: string;
+  birthDate: string;
 
   @ApiProperty({ enum: GenderEnum })
   @IsEnum(GenderEnum)
