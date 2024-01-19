@@ -1,4 +1,4 @@
 export enum ChatUser {
-  STUDENT = 'STUDENT',
-  BOT = 'BOT',
+  STUDENT = 'user',
+  BOT = 'assistant',
 }

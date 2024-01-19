@@ -80,7 +80,7 @@ model Chat {
 
 model Interaction {
   id      String          @id @default(cuid())
-  user    InteractionUser @default(STUDENT) // STUDENT, BOT
+  user    InteractionUser @default(user) // STUDENT, BOT
   message String          @db.Text
   date    DateTime        @db.Timestamptz()
   chat    Chat            @relation(fields: [chatId], references: [id])
@@ -126,8 +126,8 @@ model CourseStudent {
 }
 
 enum InteractionUser {
-  STUDENT
-  BOT
+  user
+  assistant
 }
 
 enum LessonStatus {

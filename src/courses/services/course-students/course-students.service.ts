@@ -157,6 +157,17 @@ export class CourseStudentsService {
                 email: true,
               },
             },
+            modules: {
+              select: {
+                id: true,
+                name: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+              where: {
+                status: true,
+              },
+            },
           },
         },
         id: true,

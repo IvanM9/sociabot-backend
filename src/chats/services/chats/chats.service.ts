@@ -1,10 +1,19 @@
+import { BotService } from '@/bot/bot.service';
 import { CreateChatsDto, CreateInteractionsDto } from '@/chats/dtos/chats.dto';
+import { ChatUser } from '@/chats/enums/chat-user.enum';
 import { PrismaService } from '@/prisma.service';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 @Injectable()
 export class ChatsService {
-  constructor(private db: PrismaService) {}
+  constructor(
+    private db: PrismaService,
+    private botService: BotService,
+  ) {}
 
   async getChats(studentId: string, moduleId: string) {
     return await this.db.chat.findMany({
@@ -68,8 +77,6 @@ export class ChatsService {
         throw new NotFoundException(`Error al obtener el estudiante`);
       });
 
-    // TODO: Dependiendo de una valor random, la IA puede empezar la conversación
-
     return (
       await this.db.chat.create({
         data: {
@@ -81,7 +88,7 @@ export class ChatsService {
   }
 
   async newMessage(data: CreateInteractionsDto) {
-    const chat = await this.db.chat
+    await this.db.chat
       .findUniqueOrThrow({
         where: { id: data.chatId },
       })
@@ -89,15 +96,53 @@ export class ChatsService {
         throw new NotFoundException(`Error al obtener el chat`);
       });
 
-    // TODO: Devolver el mensaje generado por la IA
-
-    return await this.db.interaction.create({
-      data: {
-        user: data.user,
-        message: data.message,
-        chatId: chat.id,
-        date: new Date(),
+    const messages = await this.db.interaction.findMany({
+      where: {
+        chatId: data.chatId,
+      },
+      select: {
+        message: true,
+        user: true,
+      },
+      orderBy: {
+        date: 'asc',
       },
     });
+
+    const historial: Array<{ content: string; role: string }> = [];
+    if (messages.length > 0) {
+      for (const message of messages) {
+        historial.push({ content: message.message, role: message.user });
+      }
+    }
+
+    historial.push({ content: data.message, role: ChatUser.STUDENT });
+
+    const request = await this.botService.newRequest(historial);
+
+    const nowDate = new Date();
+
+    await this.db.interaction
+      .createMany({
+        data: [
+          {
+            chatId: data.chatId,
+            user: data.user,
+            message: data.message,
+            date: nowDate,
+          },
+          {
+            chatId: data.chatId,
+            user: ChatUser.BOT,
+            message: request.choices[0].message.content,
+            date: nowDate,
+          },
+        ],
+      })
+      .catch(() => {
+        throw new BadRequestException(`Error al crear el mensaje`);
+      });
+
+    return request.choices[0].message.content;
   }
 }
