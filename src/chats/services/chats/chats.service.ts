@@ -48,6 +48,7 @@ export class ChatsService {
             id: true,
             user: true,
             message: true,
+            date: true,
           },
           orderBy: {
             date: 'asc',
@@ -109,17 +110,13 @@ export class ChatsService {
       },
     });
 
-    const historial: Array<{ content: string; role: string }> = [];
-    if (messages.length > 0) {
-      for (const message of messages) {
-        historial.push({ content: message.message, role: message.user });
-      }
-    }
-
+    const historial = messages.map((message) => ({
+      content: message.message,
+      role: message.user,
+    }));
     historial.push({ content: data.message, role: ChatUser.STUDENT });
 
     const request = await this.botService.newRequest(historial);
-
     const nowDate = new Date();
 
     await this.db.interaction
@@ -140,7 +137,20 @@ export class ChatsService {
         ],
       })
       .catch(() => {
-        throw new BadRequestException(`Error al crear el mensaje`);
+        throw new BadRequestException(`Error al guardar los mensajes`);
+      });
+
+    await this.db.chat
+      .update({
+        where: {
+          id: data.chatId,
+        },
+        data: {
+          updatedAt: nowDate,
+        },
+      })
+      .catch(() => {
+        throw new BadRequestException(`Error al actualizar el chat`);
       });
 
     return request.choices[0].message.content;
