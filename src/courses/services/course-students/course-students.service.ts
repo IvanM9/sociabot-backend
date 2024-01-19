@@ -12,7 +12,6 @@ export class CourseStudentsService {
   constructor(private db: PrismaService) {}
 
   async joinCourse(data: CreateCourseStudentsDto) {
-    console.log(data);
     const { id } = await this.db.course
       .findUniqueOrThrow({
         where: { code: data.courseCode },
@@ -156,6 +155,17 @@ export class CourseStudentsService {
                 firstName: true,
                 lastName: true,
                 email: true,
+              },
+            },
+            modules: {
+              select: {
+                id: true,
+                name: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+              where: {
+                status: true,
               },
             },
           },
