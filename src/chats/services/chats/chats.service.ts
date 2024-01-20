@@ -157,6 +157,10 @@ export class ChatsService {
         throw new BadRequestException(`Error al actualizar el chat`);
       });
 
-    return request.choices[0].message.content;
+    return {
+      message: request.choices[0].message.content,
+      user: ChatUser.BOT,
+      date: nowDate,
+    };
   }
 }
