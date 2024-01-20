@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from '@/security/auth/dtos/LoginDto';
 import { PrismaService } from '@/prisma.service';
 import { compare } from 'bcrypt';
+import { ENVIRONMENT } from '@/shared/constant/environment';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +36,7 @@ export class AuthService {
         },
         {
           expiresIn: '9h',
-          secret: 'sociabot2024',
+          secret: ENVIRONMENT.JWT_SECRET_KEY,
         },
       ),
       role: user.role,

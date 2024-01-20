@@ -31,31 +31,35 @@ export class ChatsService {
         updatedAt: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        updatedAt: 'desc',
       },
     });
   }
 
   async getChat(id: string) {
-    return await this.db.chat.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        interactions: {
-          select: {
-            id: true,
-            user: true,
-            message: true,
-            date: true,
-          },
-          orderBy: {
-            date: 'asc',
+    return await this.db.chat
+      .findUniqueOrThrow({
+        where: { id },
+        select: {
+          id: true,
+          createdAt: true,
+          updatedAt: true,
+          interactions: {
+            select: {
+              id: true,
+              user: true,
+              message: true,
+              date: true,
+            },
+            orderBy: {
+              date: 'asc',
+            },
           },
         },
-      },
-    });
+      })
+      .catch(() => {
+        throw new NotFoundException(`Error al obtener el chat`);
+      });
   }
 
   async joinChat(data: CreateChatsDto) {
@@ -153,6 +157,10 @@ export class ChatsService {
         throw new BadRequestException(`Error al actualizar el chat`);
       });
 
-    return request.choices[0].message.content;
+    return {
+      message: request.choices[0].message.content,
+      user: ChatUser.BOT,
+      date: nowDate,
+    };
   }
 }

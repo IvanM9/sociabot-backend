@@ -5,13 +5,14 @@ import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { PrismaService } from '@/prisma.service';
 import { JwtStrategy } from './jwt-strategy/jwt.strategy';
+import { ENVIRONMENT } from '@/shared/constant/environment';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       global: true,
-      secret: 'sociabot2024',
+      secret: ENVIRONMENT.JWT_SECRET_KEY,
     }),
   ],
   controllers: [AuthController],

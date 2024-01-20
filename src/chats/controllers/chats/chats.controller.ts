@@ -32,8 +32,6 @@ export class ChatsController {
   @Role(RoleEnum.STUDENT)
   @ApiOperation({
     summary: 'Crear un nuevo chat',
-    description:
-      'Crear un nuevo chat, en el cual el puede ser que la IA empiece la conversación o el estudiante',
   })
   async createChat(
     @Body() data: CreateChatsDto,
