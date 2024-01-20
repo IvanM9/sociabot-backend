@@ -1,4 +1,3 @@
-import { CreateCoursesDto } from '@/courses/dtos/courses.dto';
 import { CreateModulesDto, UpdateModulesDto } from '@/courses/dtos/modules.dto';
 import { ModulesService } from '@/courses/services/modules/modules.service';
 import { CurrentUser } from '@/security/jwt-strategy/auth.decorator';

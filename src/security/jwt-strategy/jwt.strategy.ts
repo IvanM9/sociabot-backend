@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 // import { Environment } from '@shared/constants/environment';
 import { InfoUserInterface } from '@/security/jwt-strategy/info-user.interface';
+import { ENVIRONMENT } from '@/shared/constant/environment';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 
@@ -12,7 +13,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: 'sociabot2024',
+      secretOrKey: ENVIRONMENT.JWT_SECRET_KEY,
     });
   }
   async validate(payload: InfoUserInterface) {
