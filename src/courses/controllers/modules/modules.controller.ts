@@ -93,7 +93,7 @@ export class ModulesController {
   }
 
   @Get(':courseId')
-  @Role(RoleEnum.TEACHER)
+  @Role(RoleEnum.TEACHER, RoleEnum.STUDENT)
   @ApiQuery({ name: 'status', required: false })
   @ApiOperation({ summary: 'Obtener módulos por curso' })
   async getModulesByCourse(
