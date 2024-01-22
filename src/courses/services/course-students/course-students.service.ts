@@ -133,7 +133,7 @@ export class CourseStudentsService {
         where: { id: studentId, role: RoleEnum.STUDENT },
       })
       .catch(() => {
-        throw new BadRequestException('Estudiante no encontrado');
+        throw new NotFoundException('Estudiante no encontrado');
       });
 
     const courseStudents = await this.db.courseStudent.findMany({
@@ -157,20 +157,14 @@ export class CourseStudentsService {
                 email: true,
               },
             },
-            modules: {
-              select: {
-                id: true,
-                name: true,
-                createdAt: true,
-                updatedAt: true,
-              },
-              where: {
-                status: true,
-              },
-            },
           },
         },
         id: true,
+      },
+      orderBy: {
+        course: {
+          name: 'asc',
+        },
       },
     });
 
