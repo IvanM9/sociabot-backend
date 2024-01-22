@@ -16,6 +16,7 @@ export class CreateInteractionsDto {
   chatId: string;
 
   user?: ChatUser;
+  date?: Date;
 
   @ApiProperty()
   @IsString()

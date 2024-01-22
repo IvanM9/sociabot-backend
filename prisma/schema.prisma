@@ -72,6 +72,7 @@ model Chat {
   createdBy       String?       @map("created_by")
   module          Module        @relation(fields: [moduleId], references: [id])
   moduleId        String        @map("module_id")
+  status          Boolean?      @default(true)
 
   interactions Interaction[]
 

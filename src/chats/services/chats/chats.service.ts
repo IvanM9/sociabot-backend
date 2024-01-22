@@ -29,6 +29,7 @@ export class ChatsService {
         id: true,
         createdAt: true,
         updatedAt: true,
+        observations: true,
       },
       orderBy: {
         updatedAt: 'desc',
@@ -55,6 +56,7 @@ export class ChatsService {
               date: 'asc',
             },
           },
+          status: true,
         },
       })
       .catch(() => {
@@ -110,16 +112,17 @@ export class ChatsService {
         user: true,
       },
       orderBy: {
-        date: 'asc',
+        date: 'desc',
       },
+      take: 4,
     });
 
-    const historial = messages.map((message) => ({
-      content: message.message,
-      role: message.user,
-    }));
+    messages.reverse();
+
+    const historial = this.getHistorial(messages);
     historial.push({ content: data.message, role: ChatUser.STUDENT });
 
+    data.date = new Date();
     const request = await this.botService.newRequest(historial);
     const nowDate = new Date();
 
@@ -130,7 +133,7 @@ export class ChatsService {
             chatId: data.chatId,
             user: data.user,
             message: data.message,
-            date: nowDate,
+            date: data.date,
           },
           {
             chatId: data.chatId,
@@ -162,5 +165,79 @@ export class ChatsService {
       user: ChatUser.BOT,
       date: nowDate,
     };
+  }
+
+  private getHistorial(messages: any[]) {
+    const historial = [
+      {
+        content:
+          'Eres un estudiante de secundaria llamado Jamie, sólo debes actuar como él. Estás hablando con Marcos, un compañero nuevo en tu escuela. Jamie quiere practicar cómo hacer nuevos amigos, por lo que inicia una conversación casual con Marcos. Jamie escucha atentamente las respuestas de Marcos y haz preguntas de seguimiento para conocerlo mejor. La conversación debe sentirse natural y cómoda. Jamie practica la escucha activa y se enfoca en aprender más sobre los intereses y experiencias de Marcos. La meta es tener una agradable charla inicial que podría llevar a una nueva amistad.',
+        role: 'system',
+      },
+    ];
+    historial.push(
+      ...messages.map((message) => ({
+        content: message.message,
+        role: message.user,
+      })),
+    );
+
+    return historial;
+  }
+
+  async getObservations(id: string) {
+    const messages = await this.db.interaction.findMany({
+      where: {
+        chatId: id,
+      },
+      select: {
+        message: true,
+        user: true,
+      },
+      orderBy: {
+        date: 'desc',
+      },
+      take: 6,
+    });
+
+    if (messages.length === 0) {
+      throw new BadRequestException(
+        `No se puede dar observaciones en una conversación vacía`,
+      );
+    }
+
+    messages.reverse();
+    const historial = [
+      {
+        content:
+          'Analiza la conversación que tuviste con Marcos y escribe tus observaciones. ¿Qué tan bien te conectaste con Marcos? ¿Qué tan bien Marcos se enfocó en ti y no en si mismo? ¿Qué tan bien Marcos se enfocó en tus intereses y experiencias? ¿Qué tan bien Marcos se enfocó en tener una conversación natural y cómoda? ¿Qué tan bien te enfocaste en tener una conversación que podría llevar a una nueva amistad? ¿Qué recomendaciones le darías a Marcos para mejorar su habilidad de hacer amigos?',
+        role: 'system',
+      },
+    ];
+
+    historial.push(
+      ...messages.map((message) => ({
+        content: message.message,
+        role: message.user,
+      })),
+    );
+
+    const observations = await this.botService.newRequest(historial);
+
+    await this.db.chat
+      .update({
+        where: {
+          id,
+        },
+        data: {
+          observations: observations.choices[0].message.content,
+          status: false,
+        },
+      })
+      .catch(() => {
+        throw new BadRequestException(`Error al actualizar el chat`);
+      });
+
+    return observations.choices[0].message.content;
   }
 }
