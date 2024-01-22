@@ -83,4 +83,15 @@ export class ChatsController {
       data: await this.service.newMessage(data),
     };
   }
+
+  @Get('get-observations/:chatId')
+  @ApiOperation({
+    summary: 'Obtener las observaciones de un chat',
+  })
+  @Role(RoleEnum.STUDENT)
+  async getObservations(@Param('chatId') chatId: string) {
+    return {
+      data: await this.service.getObservations(chatId),
+    };
+  }
 }
