@@ -89,9 +89,9 @@ export class ChatsController {
     summary: 'Obtener las observaciones de un chat',
   })
   @Role(RoleEnum.STUDENT)
-  async getObservations(@Param('chatId') chatId: string) {
+  async getObservations(@Param('chatId') chatId: string, @CurrentUser() { id }: InfoUserInterface) {
     return {
-      data: await this.service.getObservations(chatId),
+      data: await this.service.getObservations(chatId, id),
     };
   }
 }
