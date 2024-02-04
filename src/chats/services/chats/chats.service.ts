@@ -13,7 +13,7 @@ export class ChatsService {
   constructor(
     private db: PrismaService,
     private botService: BotService,
-  ) {}
+  ) { }
 
   async getChats(studentId: string, moduleId: string) {
     return await this.db.chat.findMany({
@@ -66,7 +66,7 @@ export class ChatsService {
 
   async joinChat(data: CreateChatsDto) {
     const { courseId } = await this.db.module
-      .findUnique({
+      .findUniqueOrThrow({
         where: { id: data.moduleId },
       })
       .catch(() => {
@@ -95,9 +95,20 @@ export class ChatsService {
   }
 
   async newMessage(data: CreateInteractionsDto) {
-    await this.db.chat
+    const { courseStudent } = await this.db.chat
       .findUniqueOrThrow({
         where: { id: data.chatId },
+        select: {
+          courseStudent: {
+            select: {
+              student: {
+                select: {
+                  firstName: true,
+                }
+              }
+            }
+          }
+        }
       })
       .catch(() => {
         throw new NotFoundException(`Error al obtener el chat`);
@@ -119,7 +130,7 @@ export class ChatsService {
 
     messages.reverse();
 
-    const historial = this.getHistorial(messages);
+    const historial = this.getHistorial(messages, courseStudent.student.firstName);
     historial.push({ content: data.message, role: ChatUser.STUDENT });
 
     data.date = new Date();
@@ -167,11 +178,11 @@ export class ChatsService {
     };
   }
 
-  private getHistorial(messages: any[]) {
+  private getHistorial(messages: any[], name: string) {
     const historial = [
       {
         content:
-          'Eres un estudiante de secundaria llamado Jamie, sólo debes actuar como él. Estás hablando con Marcos, un compañero nuevo en tu escuela. Jamie quiere practicar cómo hacer nuevos amigos, por lo que inicia una conversación casual con Marcos. Jamie escucha atentamente las respuestas de Marcos y haz preguntas de seguimiento para conocerlo mejor. La conversación debe sentirse natural y cómoda. Jamie practica la escucha activa y se enfoca en aprender más sobre los intereses y experiencias de Marcos. La meta es tener una agradable charla inicial que podría llevar a una nueva amistad.',
+          `Eres un estudiante de secundaria llamado Jamie, sólo debes actuar como él. Estás hablando con ${name}, un compañero nuevo en tu escuela. ${name} quiere practicar cómo hacer nuevos amigos, por lo que inicia una conversación casual con Jamie. Jamie escucha atentamente las respuestas de ${name} y haz preguntas de seguimiento para conocerlo mejor. La conversación debe sentirse natural y cómoda. Jamie practica la escucha activa y se enfoca en aprender más sobre los intereses y experiencias de ${name}. La meta es tener una agradable charla inicial que podría llevar a una nueva amistad.`,
         role: 'system',
       },
     ];
@@ -185,7 +196,7 @@ export class ChatsService {
     return historial;
   }
 
-  async getObservations(id: string) {
+  async getObservations(id: string, userId: string) {
     const messages = await this.db.interaction.findMany({
       where: {
         chatId: id,
@@ -206,21 +217,25 @@ export class ChatsService {
       );
     }
 
-    messages.reverse();
-    const historial = [
-      {
-        content:
-          'Analiza la conversación que tuviste con Marcos y escribe tus observaciones. ¿Qué tan bien te conectaste con Marcos? ¿Qué tan bien Marcos se enfocó en ti y no en si mismo? ¿Qué tan bien Marcos se enfocó en tus intereses y experiencias? ¿Qué tan bien Marcos se enfocó en tener una conversación natural y cómoda? ¿Qué tan bien te enfocaste en tener una conversación que podría llevar a una nueva amistad? ¿Qué recomendaciones le darías a Marcos para mejorar su habilidad de hacer amigos?',
-        role: 'system',
+    await this.db.user.findUniqueOrThrow({
+      where: {
+        id: userId,
       },
-    ];
+    }).catch(() => {
+      throw new NotFoundException(`Error al obtener el usuario`);
+    });
 
-    historial.push(
-      ...messages.map((message) => ({
-        content: message.message,
-        role: message.user,
-      })),
-    );
+    messages.reverse();
+    const historial = messages.map((message) => ({
+      content: message.message,
+      role: message.user as string,
+    }));
+
+    historial.push({
+      content:
+        `Analiza la conversación y escribe tus observaciones. ¿Qué tan bien me enfoqué en ti y no en mí mismo? ¿Qué tan bien me enfoqué en tus intereses y experiencias? ¿Qué tan bien me enfoqué en tener una conversación natural y cómoda? ¿Qué tan bien me enfoqué en tener una conversación que podría llevar a una nueva amistad? ¿Qué recomendaciones me darías para mejorar su habilidad de hacer amigos?`,
+      role: 'user',
+    })
 
     const observations = await this.botService.newRequest(historial);
 
