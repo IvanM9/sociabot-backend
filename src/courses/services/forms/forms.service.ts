@@ -12,19 +12,19 @@ export class FormsService {
 
   async createForm(dataForm: CreateFormsDTO, userId: string) {
     await this.db.forms
-      .create({
-        data: {
-          name: dataForm.name,
-          questionsAndAnswers: dataForm.questionsAndAnswers,
-          moduleId: dataForm.moduleId,
-          startDate: dataForm.startDate,
-          endDate: dataForm.endDate,
-          createdBy: userId,
-        },
-      })
-      .catch(() => {
-        throw new BadRequestException('Error al crear el formulario');
-      });
+        .create({
+            data: {
+                name: dataForm.name,
+                questionsAndAnswers: dataForm.questionsAndAnswers as any[],
+                moduleId: dataForm.moduleId,
+                startDate: dataForm.startDate,
+                endDate: dataForm.endDate,
+                createdBy: userId,
+            },
+        })
+        .catch(() => {
+            throw new BadRequestException('Error al crear el formulario');
+        });
 
     return { message: 'Creado correctamente' };
   }

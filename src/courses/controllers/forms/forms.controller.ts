@@ -1,4 +1,4 @@
-import { CalificateFormDTO, CreateFormsDTO } from '@/courses/dtos/forms.dto';
+import { CalificateFormDTO, ComparateAnswersFormDTO, CreateFormsDTO } from '@/courses/dtos/forms.dto';
 import { FormsService } from '@/courses/services/forms/forms.service';
 import { CurrentUser } from '@/security/jwt-strategy/auth.decorator';
 import { InfoUserInterface } from '@/security/jwt-strategy/info-user.interface';
@@ -81,7 +81,7 @@ export class FormsController {
   @Role(RoleEnum.STUDENT)
   @ApiOperation({ summary: 'Comparar respuestas' })
   async compareAnswer(
-    @Body() body: any,
+    @Body() body: ComparateAnswersFormDTO,
     @CurrentUser() { id }: InfoUserInterface,
   ) {
     return await this.formService.compareAnswers(body);

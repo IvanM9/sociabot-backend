@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNumber, IsObject, IsString } from 'class-validator';
+import { IsArray, IsDate, IsNumber, IsObject, IsString } from 'class-validator';
 
 export class CreateFormsDTO {
   @ApiProperty()
@@ -11,8 +11,8 @@ export class CreateFormsDTO {
   name: string;
 
   @ApiProperty()
-  @IsObject()
-  questionsAndAnswers: any[];
+  @IsArray()
+  questionsAndAnswers: QuestionAndAnswers[];
 
   @ApiProperty()
   @IsDate()
@@ -30,7 +30,7 @@ export class UpdateFormsDTO {
 
   @ApiProperty()
   @IsObject()
-  questionsAndAnswers: any[];
+  questionsAndAnswers: QuestionAndAnswers[];
 
   @ApiProperty()
   @IsDate()
@@ -79,4 +79,9 @@ export class ComparateAnswersFormDTO {
   @ApiProperty()
   @IsNumber()
   score: number;
+}
+
+export interface QuestionAndAnswers {
+  question: Object;
+  answer: Object;
 }
