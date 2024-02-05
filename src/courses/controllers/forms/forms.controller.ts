@@ -1,4 +1,7 @@
-import { CalificateFormDTO, ComparateAnswersFormDTO, CreateFormsDTO } from '@/courses/dtos/forms.dto';
+import {
+  ComparateAnswersFormDTO,
+  CreateFormsDTO
+} from '@/courses/dtos/forms.dto';
 import { FormsService } from '@/courses/services/forms/forms.service';
 import { CurrentUser } from '@/security/jwt-strategy/auth.decorator';
 import { InfoUserInterface } from '@/security/jwt-strategy/info-user.interface';
@@ -16,6 +19,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
   UseInterceptors,
@@ -41,11 +45,12 @@ export class FormsController {
   async createForm(
     @Body() body: CreateFormsDTO,
     @CurrentUser() { id }: InfoUserInterface,
+    @Query('moduleId') moduleId: string,
   ) {
-    return await this.formService.createForm(body, id);
+    return await this.formService.createForm(body, moduleId, id);
   }
 
-  @Patch('status/:formId')
+  @Patch(':formId/status')
   @Role(RoleEnum.TEACHER)
   @ApiOperation({ summary: 'Activar o desactivar un formulario' })
   async changeStatus(
@@ -55,26 +60,33 @@ export class FormsController {
     return await this.formService.changeStatus({ formId, userId: id });
   }
 
-  @Get(':moduleId/forms')
+  @Get(':moduleId')
   @Role(RoleEnum.TEACHER)
   @ApiQuery({ name: 'status', required: false })
   @ApiOperation({ summary: 'Obtener los formularios de un determinado modulo' })
-  async getCoursesByStudent(
+  async getFormsByModule(
     @Param('moduleId') moduleId: string,
     @Query('status', ParseStatusPipe) status: boolean,
+    @CurrentUser() { id }: InfoUserInterface,
   ) {
-    const data = await this.formService.listMyFormsByModule(moduleId, status);
+    const data = await this.formService.listMyFormsByModule(
+      moduleId,
+      status,
+      id,
+    );
     return { data, message: 'Formularios encontrados' };
   }
 
-  @Post('calificate')
+  @Get()
   @Role(RoleEnum.TEACHER)
-  @ApiOperation({ summary: 'Calificar un formulario' })
-  async calificateForm(
-    @Body() body: CalificateFormDTO,
+  @ApiQuery({ name: 'status', required: false })
+  @ApiOperation({ summary: 'Obtener todos los formularios' })
+  async getFormsAll(
+    @Query('status', ParseStatusPipe) status: boolean,
     @CurrentUser() { id }: InfoUserInterface,
   ) {
-    return await this.formService.calificateForm(body);
+    const data = await this.formService.listMyForms(status, id);
+    return { data, message: 'Formularios encontrados' };
   }
 
   @Post('compare-answer')
@@ -85,5 +97,20 @@ export class FormsController {
     @CurrentUser() { id }: InfoUserInterface,
   ) {
     return await this.formService.compareAnswers(body);
+  }
+
+  @Put(':formId')
+  @Role(RoleEnum.TEACHER)
+  @ApiOperation({ summary: 'Actualizar un formulario' })
+  async updateForm(
+    @Param('formId') formId: string,
+    @Body() formUpdateData: CreateFormsDTO,
+    @CurrentUser() { id }: InfoUserInterface,
+  ) {
+    return await this.formService.updateForm({
+      form: formUpdateData,
+      formId: formId,
+      userId: id,
+    });
   }
 }
