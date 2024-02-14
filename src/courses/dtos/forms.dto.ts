@@ -43,6 +43,6 @@ export class ComparateAnswersFormDTO {
 }
 
 export interface QuestionAndAnswers {
-  question: Object;
-  answer: Object;
+  question: Object[];
+  answer: Object[];
 }
