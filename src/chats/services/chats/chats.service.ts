@@ -95,7 +95,7 @@ export class ChatsService {
   }
 
   async newMessage(data: CreateInteractionsDto) {
-    const { courseStudent } = await this.db.chat
+    const { courseStudent, module } = await this.db.chat
       .findUniqueOrThrow({
         where: { id: data.chatId },
         select: {
@@ -106,6 +106,11 @@ export class ChatsService {
                   firstName: true,
                 }
               }
+            }
+          },
+          module: {
+            select: {
+              goals: true,
             }
           }
         }
@@ -125,12 +130,12 @@ export class ChatsService {
       orderBy: {
         date: 'desc',
       },
-      take: 4,
+      take: 3,
     });
 
     messages.reverse();
 
-    const historial = this.getHistorial(messages, courseStudent.student.firstName);
+    const historial = this.getHistorial(messages, courseStudent.student.firstName, module.goals);
     historial.push({ content: data.message, role: ChatUser.STUDENT });
 
     data.date = new Date();
@@ -178,11 +183,11 @@ export class ChatsService {
     };
   }
 
-  private getHistorial(messages: any[], name: string) {
+  private getHistorial(messages: any[], name: string, goals: string) {
     const historial = [
       {
         content:
-          `Eres un estudiante de secundaria llamado Jamie, sólo debes actuar como él. Estás hablando con ${name}, un compañero nuevo en tu escuela. ${name} quiere practicar cómo hacer nuevos amigos, por lo que inicia una conversación casual con Jamie. Jamie escucha atentamente las respuestas de ${name} y haz preguntas de seguimiento para conocerlo mejor. La conversación debe sentirse natural y cómoda. Jamie practica la escucha activa y se enfoca en aprender más sobre los intereses y experiencias de ${name}. La meta es tener una agradable charla inicial que podría llevar a una nueva amistad.`,
+          `Eres un estudiante de secundaria llamado Jamie, sólo debes actuar como él. Estás hablando con ${name}, un compañero nuevo en tu colegio. El objetivo de esta conversa debe basarse en: '${goals}'. La conversación debe sentirse natural y cómoda.`,
         role: 'system',
       },
     ];
@@ -231,9 +236,22 @@ export class ChatsService {
       role: message.user as string,
     }));
 
+    const {module} = await this.db.chat.findUnique({
+      select: {
+        module: {
+          select: {
+            goals: true,
+          }
+        }
+      },
+      where: {
+        id,
+      }
+    })
+
     historial.push({
       content:
-        `Analiza la conversación y escribe tus observaciones. ¿Qué tan bien me enfoqué en ti y no en mí mismo? ¿Qué tan bien me enfoqué en tus intereses y experiencias? ¿Qué tan bien me enfoqué en tener una conversación natural y cómoda? ¿Qué tan bien me enfoqué en tener una conversación que podría llevar a una nueva amistad? ¿Qué recomendaciones me darías para mejorar su habilidad de hacer amigos?`,
+        `Analiza la conversación y escribe tus observaciones, basandote en lo sigiente: '${module.goals}'.¿Qué recomendaciones me darías para mejorar su habilidad de hacer amigos?`,
       role: 'user',
     })
 
