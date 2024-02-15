@@ -10,6 +10,7 @@ import { RoleEnum } from '@/security/jwt-strategy/role.enum';
 import { Role } from '@/security/jwt-strategy/roles.decorator';
 import { RoleGuard } from '@/security/jwt-strategy/roles.guard';
 import { ResponseHttpInterceptor } from '@/shared/interceptors/response-http.interceptor';
+import { OptionalBooleanPipe } from '@/shared/pipes/parse-bool-optional.pipe';
 import { ParseStatusPipe } from '@/shared/pipes/parse-status.pipe';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
@@ -78,14 +79,17 @@ export class FormsController {
   }
 
   @Get()
-  @Role(RoleEnum.TEACHER)
+  @Role(RoleEnum.TEACHER, RoleEnum.STUDENT)
   @ApiQuery({ name: 'status', required: false })
   @ApiOperation({ summary: 'Obtener todos los formularios' })
   async getFormsAll(
-    @Query('status', ParseStatusPipe) status: boolean,
-    @CurrentUser() { id }: InfoUserInterface,
+    @Query('status', OptionalBooleanPipe) status: boolean,
+    @CurrentUser() { id, role }: InfoUserInterface,
   ) {
-    const data = await this.formService.listMyForms(status, id);
+    const data = await this.formService.listMyForms(
+      status,
+      role == RoleEnum.TEACHER ? id : undefined,
+    );
     return { data, message: 'Formularios encontrados' };
   }
 
@@ -112,5 +116,12 @@ export class FormsController {
       formId: formId,
       userId: id,
     });
+  }
+
+  @Get('getById/:formId')
+  @Role(RoleEnum.STUDENT, RoleEnum.TEACHER)
+  @ApiOperation({ summary: 'Obtener un formulario por id' })
+  async getFormById(@Param('formId') formId: string) {
+    return { data: await this.formService.getFormById(formId) };
   }
 }
