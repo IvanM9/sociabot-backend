@@ -35,6 +35,7 @@ model Lesson {
   observations    String?        @db.Text
   form            Forms         @relation(fields: [formId], references: [id])
   formId          String        @map("form_id")
+  questionsAndAnswers Json[]    @map("questions_and_answers") @db.Json @default([])
 
   status LessonStatus @default(PENDING) // PENDING, IN_PROGRESS, FINISHED
 

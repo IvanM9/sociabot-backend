@@ -24,7 +24,13 @@ export class DateFormatInterceptor implements NestInterceptor {
     } else if (typeof data === 'object' && data !== null) {
       for (const key in data) {
         if (data.hasOwnProperty(key)) {
-          if (key === 'createdAt' || key === 'updatedAt' || key === 'date') {
+          if (
+            key === 'createdAt' ||
+            key === 'updatedAt' ||
+            key === 'date' ||
+            key === 'startDate' ||
+            key === 'endDate'
+          ) {
             data[key] = moment(data[key])
               .locale('es')
               .tz('America/Guayaquil')
