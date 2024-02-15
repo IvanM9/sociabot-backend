@@ -29,13 +29,12 @@ export class FormsService {
     return { message: 'Creado correctamente' };
   }
 
-
-  async listMyForms(status: boolean,moduleId:string, userId: string) {
+  async listMyForms(status: boolean, moduleId: string, userId: string) {
     const forms = await this.db.forms.findMany({
       where: {
         createdBy: userId,
         status,
-        moduleId:moduleId
+        moduleId: moduleId,
       },
       select: {
         name: true,
@@ -121,7 +120,7 @@ export class FormsService {
     return { message: 'Estado cambiado correctamente' };
   }
 
-  async compareAnswers(data: ComparateAnswersFormDTO) {
+  async compareAnswers(data: ComparateAnswersFormDTO, userId: string) {
     const form = await this.db.forms
       .findFirstOrThrow({
         where: {
@@ -134,12 +133,15 @@ export class FormsService {
 
     const correctAnswers: any[] = form.questionsAndAnswers;
 
-    let score = 0;
-    for (let i = 0; i < correctAnswers.length; i++) {
-      if (correctAnswers[i].answer === data.answers[i].answer) {
-        score += 1;
-      }
-    }
+    const score =
+      (correctAnswers.filter((answer, index) => {
+        return (
+          answer.correctAnswer ===
+          (data.formContent[index] as any).positionAnswer
+        );
+      }).length *
+        10) /
+      correctAnswers.length;
 
     await this.db.lesson
       .create({
@@ -154,7 +156,9 @@ export class FormsService {
         throw new BadRequestException('Error al responder el formulario');
       });
 
-    return { message: 'Formulario respondido correctamente' };
+    return {
+      message: 'Formulario respondido correctamente',
+    };
   }
 
   async viewAnswersByForm(formId: string) {

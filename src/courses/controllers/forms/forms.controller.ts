@@ -80,7 +80,7 @@ export class FormsController {
     @Body() body: ComparateAnswersFormDTO,
     @CurrentUser() { id }: InfoUserInterface,
   ) {
-    return await this.formService.compareAnswers(body);
+    return await this.formService.compareAnswers(body, id);
   }
 
   @Put(':formId')
