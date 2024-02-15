@@ -29,38 +29,13 @@ export class FormsService {
     return { message: 'Creado correctamente' };
   }
 
-  async listMyFormsByModule(moduleId: string, status: boolean, userId: string) {
-    const forms = await this.db.forms.findMany({
-      where: {
-        moduleId: moduleId,
-        createdBy: userId,
-        status,
-      },
-      select: {
-        name: true,
-        questionsAndAnswers: true,
-        id: true,
-        startDate: true,
-        module: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        status: true,
-        endDate: true,
-        createdBy: true,
-        createdAt: true,
-      },
-    });
-    return forms;
-  }
 
-  async listMyForms(status: boolean, userId: string) {
+  async listMyForms(status: boolean,moduleId:string, userId: string) {
     const forms = await this.db.forms.findMany({
       where: {
         createdBy: userId,
         status,
+        moduleId:moduleId
       },
       select: {
         name: true,

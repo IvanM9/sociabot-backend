@@ -1,6 +1,6 @@
 import {
   ComparateAnswersFormDTO,
-  CreateFormsDTO
+  CreateFormsDTO,
 } from '@/courses/dtos/forms.dto';
 import { FormsService } from '@/courses/services/forms/forms.service';
 import { CurrentUser } from '@/security/jwt-strategy/auth.decorator';
@@ -60,23 +60,6 @@ export class FormsController {
     return await this.formService.changeStatus({ formId, userId: id });
   }
 
-  @Get(':moduleId')
-  @Role(RoleEnum.TEACHER)
-  @ApiQuery({ name: 'status', required: false })
-  @ApiOperation({ summary: 'Obtener los formularios de un determinado modulo' })
-  async getFormsByModule(
-    @Param('moduleId') moduleId: string,
-    @Query('status', ParseStatusPipe) status: boolean,
-    @CurrentUser() { id }: InfoUserInterface,
-  ) {
-    const data = await this.formService.listMyFormsByModule(
-      moduleId,
-      status,
-      id,
-    );
-    return { data, message: 'Formularios encontrados' };
-  }
-
   @Get()
   @Role(RoleEnum.TEACHER)
   @ApiQuery({ name: 'status', required: false })
@@ -84,8 +67,9 @@ export class FormsController {
   async getFormsAll(
     @Query('status', ParseStatusPipe) status: boolean,
     @CurrentUser() { id }: InfoUserInterface,
+    @Query('moduleId') moduleId?: string,
   ) {
-    const data = await this.formService.listMyForms(status, id);
+    const data = await this.formService.listMyForms(status, moduleId, id);
     return { data, message: 'Formularios encontrados' };
   }
 
