@@ -66,13 +66,13 @@ export class FormsController {
   @ApiQuery({ name: 'status', required: false })
   @ApiOperation({ summary: 'Obtener todos los formularios' })
   async getFormsAll(
+    @CurrentUser() { id, role }: InfoUserInterface,
     @Query('moduleId') moduleId?: string,
     @Query('status', OptionalBooleanPipe) status?: boolean,
-    @CurrentUser() { id, role }: InfoUserInterface,
   ) {
     const data = await this.formService.listMyForms(
       status,
-      module,
+      moduleId,
       role == RoleEnum.TEACHER ? id : undefined,
     );
 
