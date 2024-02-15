@@ -57,6 +57,19 @@ export class CourseStudentsController {
     return await this.service.changeStatus({ studentId, courseId });
   }
 
+  @Get('/students')
+  @Role(RoleEnum.TEACHER)
+  @ApiQuery({ name: 'status', required: false })
+  @ApiOperation({ summary: 'Obtener todos los estudiantes de un profesor' })
+  async getStudentsByTeacher(
+    @CurrentUser() { id }: InfoUserInterface,
+    @Query('status', ParseStatusPipe) status: boolean,
+    @Query('courseId') courseId?: string,
+  ) {
+    const data = await this.service.listStudentsByTeacher(id,courseId, status);
+    return { data, message: 'Estudiantes encontrados' };
+  }
+
   @Get(':courseId/students')
   @Role(RoleEnum.TEACHER)
   @ApiQuery({ name: 'status', required: false })
