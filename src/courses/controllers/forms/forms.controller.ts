@@ -1,6 +1,6 @@
 import {
   ComparateAnswersFormDTO,
-  CreateFormsDTO
+  CreateFormsDTO,
 } from '@/courses/dtos/forms.dto';
 import { FormsService } from '@/courses/services/forms/forms.service';
 import { CurrentUser } from '@/security/jwt-strategy/auth.decorator';
@@ -61,35 +61,21 @@ export class FormsController {
     return await this.formService.changeStatus({ formId, userId: id });
   }
 
-  @Get(':moduleId')
-  @Role(RoleEnum.TEACHER)
-  @ApiQuery({ name: 'status', required: false })
-  @ApiOperation({ summary: 'Obtener los formularios de un determinado modulo' })
-  async getFormsByModule(
-    @Param('moduleId') moduleId: string,
-    @Query('status', ParseStatusPipe) status: boolean,
-    @CurrentUser() { id }: InfoUserInterface,
-  ) {
-    const data = await this.formService.listMyFormsByModule(
-      moduleId,
-      status,
-      id,
-    );
-    return { data, message: 'Formularios encontrados' };
-  }
-
   @Get()
   @Role(RoleEnum.TEACHER, RoleEnum.STUDENT)
   @ApiQuery({ name: 'status', required: false })
   @ApiOperation({ summary: 'Obtener todos los formularios' })
   async getFormsAll(
-    @Query('status', OptionalBooleanPipe) status: boolean,
+    @Query('moduleId') moduleId?: string,
+    @Query('status', OptionalBooleanPipe) status?: boolean,
     @CurrentUser() { id, role }: InfoUserInterface,
   ) {
     const data = await this.formService.listMyForms(
       status,
+      module,
       role == RoleEnum.TEACHER ? id : undefined,
     );
+
     return { data, message: 'Formularios encontrados' };
   }
 
@@ -100,7 +86,7 @@ export class FormsController {
     @Body() body: ComparateAnswersFormDTO,
     @CurrentUser() { id }: InfoUserInterface,
   ) {
-    return await this.formService.compareAnswers(body);
+    return await this.formService.compareAnswers(body, id);
   }
 
   @Put(':formId')

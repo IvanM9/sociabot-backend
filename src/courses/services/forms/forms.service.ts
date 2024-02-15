@@ -1,6 +1,6 @@
 import {
-    ComparateAnswersFormDTO,
-    CreateFormsDTO
+  ComparateAnswersFormDTO,
+  CreateFormsDTO,
 } from '@/courses/dtos/forms.dto';
 import { PrismaService } from '@/prisma.service';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -29,38 +29,13 @@ export class FormsService {
     return { message: 'Creado correctamente' };
   }
 
-  async listMyFormsByModule(moduleId: string, status: boolean, userId: string) {
-    const forms = await this.db.forms.findMany({
-      where: {
-        moduleId: moduleId,
-        createdBy: userId,
-        status,
-      },
-      select: {
-        name: true,
-        questionsAndAnswers: true,
-        id: true,
-        startDate: true,
-        module: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        status: true,
-        endDate: true,
-        createdBy: true,
-        createdAt: true,
-      },
-    });
-    return forms;
-  }
 
-  async listMyForms(status: boolean, userId?: string) {
+  async listMyForms(status: boolean, moduleId: string, userId: string) {
     const forms = await this.db.forms.findMany({
       where: {
         createdBy: userId,
         status,
+        moduleId: moduleId,
       },
       select: {
         name: true,
@@ -146,8 +121,7 @@ export class FormsService {
     return { message: 'Estado cambiado correctamente' };
   }
 
-
-  async compareAnswers(data: ComparateAnswersFormDTO) {
+  async compareAnswers(data: ComparateAnswersFormDTO, userId: string) {
     const form = await this.db.forms
       .findFirstOrThrow({
         where: {
@@ -160,12 +134,15 @@ export class FormsService {
 
     const correctAnswers: any[] = form.questionsAndAnswers;
 
-    let score = 0;
-    for (let i = 0; i < correctAnswers.length; i++) {
-      if (correctAnswers[i].answer === data.answers[i].answer) {
-        score += 1;
-      }
-    }
+    const score =
+      (correctAnswers.filter((answer, index) => {
+        return (
+          answer.correctAnswer ===
+          (data.formContent[index] as any).positionAnswer
+        );
+      }).length *
+        10) /
+      correctAnswers.length;
 
     await this.db.lesson
       .create({
@@ -180,7 +157,40 @@ export class FormsService {
         throw new BadRequestException('Error al responder el formulario');
       });
 
-    return { message: 'Formulario respondido correctamente' };
+    return {
+      message: 'Formulario respondido correctamente',
+    };
+  }
+
+  async viewAnswersByForm(formId: string) {
+    const answer = await this.db.lesson.findMany({
+      select: {
+        courseStudentId: true,
+        courseStudent: {
+          include: {
+            student: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+                id: true,
+              },
+            },
+            course: {
+              select: {
+                name: true,
+                id: true,
+              },
+            },
+          },
+        },
+        score: true,
+        date: true,
+      },
+      where: {
+        formId: formId,
+      },
+    });
   }
 
   async getFormById(formId: string) {

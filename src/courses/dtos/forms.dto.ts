@@ -8,7 +8,7 @@ export class CreateFormsDTO {
 
   @ApiProperty()
   @IsArray()
-  questionsAndAnswers: QuestionAndAnswers;
+  questionsAndAnswers: Object[];
 
   @ApiProperty()
   @IsDate()
@@ -26,23 +26,10 @@ export class ComparateAnswersFormDTO {
   formId: string;
 
   @ApiProperty()
-  @IsString()
-  userId: string;
-
-  @ApiProperty()
-  @IsObject()
-  answers: any;
+  @IsArray()
+  formContent: Object[];
 
   @ApiProperty()
   @IsString()
   courseStudentId: string;
-
-  @ApiProperty()
-  @IsNumber()
-  score: number;
-}
-
-export interface QuestionAndAnswers {
-  question: Object[];
-  answer: Object[];
 }
