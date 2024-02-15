@@ -1,6 +1,6 @@
 import {
-    ComparateAnswersFormDTO,
-    CreateFormsDTO
+  ComparateAnswersFormDTO,
+  CreateFormsDTO,
 } from '@/courses/dtos/forms.dto';
 import { PrismaService } from '@/prisma.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
@@ -146,7 +146,6 @@ export class FormsService {
     return { message: 'Estado cambiado correctamente' };
   }
 
-
   async compareAnswers(data: ComparateAnswersFormDTO) {
     const form = await this.db.forms
       .findFirstOrThrow({
@@ -181,5 +180,36 @@ export class FormsService {
       });
 
     return { message: 'Formulario respondido correctamente' };
+  }
+
+  async viewAnswersByForm(formId: string) {
+    const answer = await this.db.lesson.findMany({
+      select: {
+        courseStudentId: true,
+        courseStudent: {
+          include: {
+            student: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+                id: true,
+              },
+            },
+            course: {
+              select: {
+                name: true,
+                id: true,
+              },
+            },
+          },
+        },
+        score: true,
+        date: true,
+      },
+      where: {
+        formId: formId,
+      },
+    });
   }
 }

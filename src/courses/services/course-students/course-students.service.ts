@@ -127,6 +127,55 @@ export class CourseStudentsService {
     return courseStudents;
   }
 
+  async listStudentsByTeacher(teacherId: string, courseId:string, status: boolean) {
+    const coursesTeacher = await this.db.course
+      .findMany({
+        where: { createdBy: teacherId, status, id: courseId },
+      })
+      .catch(() => {
+        throw new BadRequestException('No se encontró el profesor');
+      });
+
+    if (!coursesTeacher.length) {
+      throw new NotFoundException(
+        'No se encontraron cursos para este profesor',
+      );
+    }
+
+    const courseIds = coursesTeacher.map((course) => course.id);
+
+    const courseStudents = await this.db.courseStudent.findMany({
+      where: {
+        courseId: { in: courseIds },
+        status,
+      },
+      select: {
+        student: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            gender: true,
+            birthDate: true,
+          },
+        },
+        course: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return courseStudents;
+  }
+
   async listCoursesByStudent(studentId: string, status: boolean) {
     const { id } = await this.db.user
       .findUniqueOrThrow({
