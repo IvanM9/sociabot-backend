@@ -3,7 +3,7 @@ import {
     CreateFormsDTO
 } from '@/courses/dtos/forms.dto';
 import { PrismaService } from '@/prisma.service';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class FormsService {
@@ -56,7 +56,7 @@ export class FormsService {
     return forms;
   }
 
-  async listMyForms(status: boolean, userId: string) {
+  async listMyForms(status: boolean, userId?: string) {
     const forms = await this.db.forms.findMany({
       where: {
         createdBy: userId,
@@ -181,5 +181,28 @@ export class FormsService {
       });
 
     return { message: 'Formulario respondido correctamente' };
+  }
+
+  async getFormById(formId: string) {
+    const form = await this.db.forms
+      .findFirstOrThrow({
+        where: {
+          id: formId,
+          status: true,
+        },
+        select: {
+          name: true,
+          questionsAndAnswers: true,
+          startDate: true,
+          endDate: true,
+          createdBy: true,
+          createdAt: true,
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('Formulario no encontrado');
+      });
+
+    return form;
   }
 }
