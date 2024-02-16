@@ -11,7 +11,6 @@ import { Role } from '@/security/jwt-strategy/roles.decorator';
 import { RoleGuard } from '@/security/jwt-strategy/roles.guard';
 import { ResponseHttpInterceptor } from '@/shared/interceptors/response-http.interceptor';
 import { OptionalBooleanPipe } from '@/shared/pipes/parse-bool-optional.pipe';
-import { ParseStatusPipe } from '@/shared/pipes/parse-status.pipe';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   Body,
@@ -66,12 +65,12 @@ export class FormsController {
   @ApiQuery({ name: 'status', required: false })
   @ApiOperation({ summary: 'Obtener todos los formularios' })
   async getFormsAll(
+    @Query('moduleId') moduleId: string,
+    @Query('status', OptionalBooleanPipe) status: boolean,
     @CurrentUser() { id, role }: InfoUserInterface,
-    @Query('moduleId') moduleId?: string,
-    @Query('status', OptionalBooleanPipe) status?: boolean,
   ) {
     const data = await this.formService.listMyForms(
-      status,
+      role == RoleEnum.STUDENT ? status : true,
       moduleId,
       role == RoleEnum.TEACHER ? id : undefined,
     );
