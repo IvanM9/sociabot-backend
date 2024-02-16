@@ -3,14 +3,17 @@ import {
   CreateFormsDTO,
 } from '@/courses/dtos/forms.dto';
 import { PrismaService } from '@/prisma.service';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 @Injectable()
 export class FormsService {
   constructor(private db: PrismaService) {}
 
   async createForm(dataForm: CreateFormsDTO, moduleId: string, userId: string) {
-    console.log(dataForm);
     await this.db.forms
       .create({
         data: {
@@ -28,7 +31,6 @@ export class FormsService {
 
     return { message: 'Creado correctamente' };
   }
-
 
   async listMyForms(status: boolean, moduleId: string, userId: string) {
     const forms = await this.db.forms.findMany({
@@ -158,39 +160,53 @@ export class FormsService {
       });
 
     return {
+      data: score,
       message: 'Formulario respondido correctamente',
     };
   }
 
-  async viewAnswersByForm(formId: string) {
-    const answer = await this.db.lesson.findMany({
-      select: {
-        courseStudentId: true,
+  async viewAnswersByForm(courseStudentId: string) {
+    const answers = await this.db.lesson.findMany({
+      where: {
         courseStudent: {
-          include: {
+          id: courseStudentId,
+        },
+      },
+      select: {
+        id: true,
+        score: true,
+        date: true,
+        courseStudentId: true,
+        observations: true,
+        courseStudent: {
+          select: {
+            id: true,
             student: {
               select: {
+                id: true,
                 firstName: true,
                 lastName: true,
                 email: true,
-                id: true,
               },
             },
             course: {
               select: {
-                name: true,
                 id: true,
+                name: true,
               },
             },
           },
         },
-        score: true,
-        date: true,
-      },
-      where: {
-        formId: formId,
+        form: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
+
+    return answers;
   }
 
   async getFormById(formId: string) {
