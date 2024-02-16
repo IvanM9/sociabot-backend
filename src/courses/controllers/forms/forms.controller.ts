@@ -70,7 +70,7 @@ export class FormsController {
     @CurrentUser() { id, role }: InfoUserInterface,
   ) {
     const data = await this.formService.listMyForms(
-      status,
+      role == RoleEnum.STUDENT ? status : true,
       moduleId,
       role == RoleEnum.TEACHER ? id : undefined,
     );
