@@ -3,7 +3,11 @@ import {
   CreateFormsDTO,
 } from '@/courses/dtos/forms.dto';
 import { PrismaService } from '@/prisma.service';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 @Injectable()
 export class FormsService {
@@ -29,13 +33,15 @@ export class FormsService {
     return { message: 'Creado correctamente' };
   }
 
-
   async listMyForms(status: boolean, moduleId: string, userId: string) {
     const forms = await this.db.forms.findMany({
       where: {
         createdBy: userId,
         status,
         moduleId: moduleId,
+        endDate: {
+          gte: new Date(),
+        },
       },
       select: {
         name: true,
@@ -144,13 +150,40 @@ export class FormsService {
         10) /
       correctAnswers.length;
 
+    const courseStudent = await this.db.courseStudent.findFirst({
+      where: {
+        student: {
+          id: userId,
+        },
+        course: {
+          modules: {
+            some: {
+              id: form.moduleId,
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const questionsAndAnswers = data.formContent.map((qa) => {
+      return {
+        question: qa.question,
+        selectedAnswer: qa.positionAnswer,
+        answer: qa.answer,
+      };
+    });
+
     await this.db.lesson
       .create({
         data: {
           formId: form.id,
-          courseStudentId: data.courseStudentId,
+          courseStudentId: courseStudent.id,
           score: score,
           date: new Date(),
+          questionsAndAnswers,
         },
       })
       .catch(() => {
@@ -158,12 +191,15 @@ export class FormsService {
       });
 
     return {
+      data: {
+        score,
+      },
       message: 'Formulario respondido correctamente',
     };
   }
 
   async viewAnswersByForm(formId: string) {
-    const answer = await this.db.lesson.findMany({
+    await this.db.lesson.findMany({
       select: {
         courseStudentId: true,
         courseStudent: {

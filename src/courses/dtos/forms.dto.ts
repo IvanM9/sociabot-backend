@@ -19,7 +19,6 @@ export class CreateFormsDTO {
   endDate: Date;
 }
 
-
 export class ComparateAnswersFormDTO {
   @ApiProperty()
   @IsString()
@@ -27,9 +26,6 @@ export class ComparateAnswersFormDTO {
 
   @ApiProperty()
   @IsArray()
-  formContent: Object[];
-
-  @ApiProperty()
-  @IsString()
-  courseStudentId: string;
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  formContent: any[];
 }
