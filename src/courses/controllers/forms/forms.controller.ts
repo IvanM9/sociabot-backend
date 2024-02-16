@@ -103,6 +103,17 @@ export class FormsController {
     });
   }
 
+  @Get('/answers/:courseStudentId')
+  @Role(RoleEnum.TEACHER)
+  @ApiOperation({ summary: 'Actualizar un formulario' })
+  async getAnswersByForm(
+    @Param('courseStudentId') courseStudentId: string,
+    @CurrentUser() { id }: InfoUserInterface,
+  ) {
+    const data = await this.formService.viewAnswersByForm( courseStudentId);
+    return { data, message: 'Respuestas encontradas' };
+  }
+
   @Get('getById/:formId')
   @Role(RoleEnum.STUDENT, RoleEnum.TEACHER)
   @ApiOperation({ summary: 'Obtener un formulario por id' })
