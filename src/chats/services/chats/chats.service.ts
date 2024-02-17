@@ -13,7 +13,7 @@ export class ChatsService {
   constructor(
     private db: PrismaService,
     private botService: BotService,
-  ) { }
+  ) {}
 
   async getChats(studentId: string, moduleId: string) {
     return await this.db.chat.findMany({
@@ -104,16 +104,16 @@ export class ChatsService {
               student: {
                 select: {
                   firstName: true,
-                }
-              }
-            }
+                },
+              },
+            },
           },
           module: {
             select: {
               goals: true,
-            }
-          }
-        }
+            },
+          },
+        },
       })
       .catch(() => {
         throw new NotFoundException(`Error al obtener el chat`);
@@ -128,20 +128,22 @@ export class ChatsService {
         user: true,
       },
       orderBy: {
-        date: 'desc',
+        date: 'asc',
       },
-      take: 3,
     });
-
-    messages.reverse();
-
-    const historial = this.getHistorial(messages, courseStudent.student.firstName, module.goals);
-    historial.push({ content: data.message, role: ChatUser.STUDENT });
-
+    const historial = this.getHistorial(
+      messages,
+      courseStudent.student.firstName,
+      module.goals,
+    );
+    historial.push({ parts: data.message, role: ChatUser.STUDENT });
     data.date = new Date();
-    const request = await this.botService.newRequest(historial);
+    const request = await this.botService.newRequest(
+      historial,
+      data.message,
+      'message',
+    );
     const nowDate = new Date();
-
     await this.db.interaction
       .createMany({
         data: [
@@ -154,12 +156,12 @@ export class ChatsService {
           {
             chatId: data.chatId,
             user: ChatUser.BOT,
-            message: request.choices[0].message.content,
+            message: request,
             date: nowDate,
           },
         ],
       })
-      .catch(() => {
+      .catch((error) => {
         throw new BadRequestException(`Error al guardar los mensajes`);
       });
 
@@ -172,12 +174,12 @@ export class ChatsService {
           updatedAt: nowDate,
         },
       })
-      .catch(() => {
+      .catch((error) => {
         throw new BadRequestException(`Error al actualizar el chat`);
       });
 
     return {
-      message: request.choices[0].message.content,
+      message: request,
       user: ChatUser.BOT,
       date: nowDate,
     };
@@ -186,14 +188,17 @@ export class ChatsService {
   private getHistorial(messages: any[], name: string, goals: string) {
     const historial = [
       {
-        content:
-          `Eres un estudiante de secundaria llamado Jamie, sólo debes actuar como él. Estás hablando con ${name}, un compañero nuevo en tu colegio. El objetivo de esta conversa debe basarse en: '${goals}'. La conversación debe sentirse natural y cómoda.`,
-        role: 'system',
+        parts: `Eres un estudiante de secundaria llamado Jamie, sólo debes actuar como él. Estás hablando con ${name}, un compañero nuevo en tu colegio. El objetivo de esta conversa debe basarse en: '${goals}'. La conversación debe sentirse natural y cómoda.`,
+        role: 'user',
+      },
+      {
+        parts: `Ok, entendido, asumire el papel de un nuevo amigo, sere muy amigable, me llamaré Jamie y se que mi objetivo es ayudarte a ti ${name} a cumplir tu obejtivo el cual es:${goals}, ademas respondere de manera asertiva cada cosa que me sea preguntada, me regire unicamente a la pregunta realizada. Evitare responder usando **Jamie:**`,
+        role: 'model',
       },
     ];
     historial.push(
       ...messages.map((message) => ({
-        content: message.message,
+        parts: message.message,
         role: message.user,
       })),
     );
@@ -211,9 +216,8 @@ export class ChatsService {
         user: true,
       },
       orderBy: {
-        date: 'desc',
+        date: 'asc',
       },
-      take: 6,
     });
 
     if (messages.length === 0) {
@@ -222,48 +226,48 @@ export class ChatsService {
       );
     }
 
-    await this.db.user.findUniqueOrThrow({
-      where: {
-        id: userId,
-      },
-    }).catch(() => {
-      throw new NotFoundException(`Error al obtener el usuario`);
-    });
+    await this.db.user
+      .findUniqueOrThrow({
+        where: {
+          id: userId,
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException(`Error al obtener el usuario`);
+      });
 
-    messages.reverse();
     const historial = messages.map((message) => ({
-      content: message.message,
+      parts: message.message,
       role: message.user as string,
     }));
 
-    const {module} = await this.db.chat.findUnique({
+    const { module } = await this.db.chat.findUnique({
       select: {
         module: {
           select: {
             goals: true,
-          }
-        }
+          },
+        },
       },
       where: {
         id,
-      }
-    })
+      },
+    });
 
-    historial.push({
-      content:
-        `Analiza la conversación y escribe tus observaciones, basandote en lo sigiente: '${module.goals}'.¿Qué recomendaciones me darías para mejorar su habilidad de hacer amigos?`,
-      role: 'user',
-    })
+    const message = `Analiza la conversación y escribe tus observaciones, basandote en lo sigiente: '${module.goals}'.¿Qué recomendaciones me darías para mejorar su habilidad de hacer amigos?`;
 
-    const observations = await this.botService.newRequest(historial);
-
+    const observations = await this.botService.newRequest(
+      historial,
+      message,
+      'observations',
+    );
     await this.db.chat
       .update({
         where: {
           id,
         },
         data: {
-          observations: observations.choices[0].message.content,
+          observations: observations,
           status: false,
         },
       })
@@ -271,6 +275,6 @@ export class ChatsService {
         throw new BadRequestException(`Error al actualizar el chat`);
       });
 
-    return observations.choices[0].message.content;
+    return observations;
   }
 }
