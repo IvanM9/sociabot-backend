@@ -147,7 +147,7 @@ model CourseStudent {
 
 enum InteractionUser {
   user
-  assistant
+  model
 }
 
 enum LessonStatus {
