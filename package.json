@@ -23,6 +23,7 @@
     "build:swc": "nest build -b swc"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.2.1",
     "@mcnaveen/license-gen": "^2.0.0",
     "@nestjs/axios": "^3.0.1",
     "@nestjs/cache-manager": "^2.2.0",

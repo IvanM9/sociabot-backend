@@ -32,14 +32,33 @@ model Lesson {
   courseStudentId String        @map("course_student_id")
   score           Int
   date            DateTime      @db.Timestamptz()
-  observations    String        @db.Text
-  module          Module        @relation(fields: [moduleId], references: [id])
-  moduleId        String        @map("module_id")
-  startDate       DateTime      @map("start_date") @db.Timestamptz()
-  endDate         DateTime      @map("end_date") @db.Timestamptz()
-  status          LessonStatus  @default(PENDING) // PENDING, IN_PROGRESS, FINISHED
+  observations    String?        @db.Text
+  form            Forms         @relation(fields: [formId], references: [id])
+  formId          String        @map("form_id")
+  questionsAndAnswers Json[]    @map("questions_and_answers") @db.Json @default([])
+
+  status LessonStatus @default(PENDING) // PENDING, IN_PROGRESS, FINISHED
 
   @@map("lessons")
+}
+
+model Forms {
+  id                  String    @id @default(cuid())
+  name                String
+  questionsAndAnswers Json[]    @map("questions_and_answers") @db.Json
+  createdBy           String    @map("created_by")
+  updatedBy           String?   @map("updated_by")
+  module              Module    @relation(fields: [moduleId], references: [id])
+  moduleId            String    @map("module_id")
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt           DateTime? @updatedAt @map("updated_at") @db.Timestamptz()
+  startDate           DateTime  @map("start_date") @db.Timestamptz()
+  endDate             DateTime  @map("end_date") @db.Timestamptz()
+  status              Boolean   @default(true)
+
+  lessons Lesson[]
+
+  @@map("forms")
 }
 
 model Module {
@@ -55,7 +74,7 @@ model Module {
   status    Boolean   @default(true)
   isPublic  Boolean   @default(false) @map("is_public")
 
-  lessons Lesson[]
+  lessons Forms[]
   chats   Chat[]
 
   @@map("modules")
@@ -128,7 +147,7 @@ model CourseStudent {
 
 enum InteractionUser {
   user
-  assistant
+  model
 }
 
 enum LessonStatus {
