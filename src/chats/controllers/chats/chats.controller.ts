@@ -1,4 +1,8 @@
-import { CreateChatsDto, CreateInteractionsDto } from '@/chats/dtos/chats.dto';
+import {
+  CreateChatsDto,
+  CreateInteractionsDto,
+  CreateObjetiveDto,
+} from '@/chats/dtos/chats.dto';
 import { ChatUser } from '@/chats/enums/chat-user.enum';
 import { ChatsService } from '@/chats/services/chats/chats.service';
 import { CurrentUser } from '@/security/jwt-strategy/auth.decorator';
@@ -89,9 +93,23 @@ export class ChatsController {
     summary: 'Obtener las observaciones de un chat',
   })
   @Role(RoleEnum.STUDENT)
-  async getObservations(@Param('chatId') chatId: string, @CurrentUser() { id }: InfoUserInterface) {
+  async getObservations(
+    @Param('chatId') chatId: string,
+    @CurrentUser() { id }: InfoUserInterface,
+  ) {
     return {
       data: await this.service.getObservations(chatId, id),
+    };
+  }
+
+  @Post('create-observation')
+  @ApiOperation({
+    summary: 'Crear una observación en un módulo',
+  })
+  @Role(RoleEnum.TEACHER)
+  async createObservation(@Body() data: CreateObjetiveDto) {
+    return {
+      data: await this.service.createObjectives(data.title),
     };
   }
 }
