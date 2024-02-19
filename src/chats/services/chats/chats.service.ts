@@ -161,7 +161,7 @@ export class ChatsService {
           },
         ],
       })
-      .catch((error) => {
+      .catch(() => {
         throw new BadRequestException(`Error al guardar los mensajes`);
       });
 
@@ -174,7 +174,7 @@ export class ChatsService {
           updatedAt: nowDate,
         },
       })
-      .catch((error) => {
+      .catch(() => {
         throw new BadRequestException(`Error al actualizar el chat`);
       });
 
@@ -188,11 +188,11 @@ export class ChatsService {
   private getHistorial(messages: any[], name: string, goals: string) {
     const historial = [
       {
-        parts: `Eres un estudiante de secundaria llamado Jamie, sólo debes actuar como él. Estás hablando con ${name}, un compañero nuevo en tu colegio. El objetivo de esta conversa debe basarse en: '${goals}'. La conversación debe sentirse natural y cómoda.`,
+        parts: `Eres Jamie, sólo debes actuar como él. Estás hablando con ${name}. El objetivo de esta conversa debe basarse en: '${goals}'. La conversación debe sentirse natural y cómoda.`,
         role: 'user',
       },
       {
-        parts: `Ok, entendido, asumire el papel de un nuevo amigo, sere muy amigable, me llamaré Jamie y se que mi objetivo es ayudarte a ti ${name} a cumplir tu obejtivo el cual es:${goals}, ademas respondere de manera asertiva cada cosa que me sea preguntada, me regire unicamente a la pregunta realizada. Evitare responder usando **Jamie:**`,
+        parts: `Ok, entendido, asumire el papel de un nuevo amigo, sere muy amigable, me llamaré Jamie y se que mi objetivo es ayudarte a ti ${name} a cumplir tus obejtivos los cuales son:${goals}, ademas responderé de manera asertiva cada cosa que me sea preguntada, me regiré únicamente a la pregunta realizada. Evitaré responder usando **Jamie:**. De vez en cuando, también realizaré preguntas para que la conversación sea más natural.`,
         role: 'model',
       },
     ];
@@ -254,13 +254,18 @@ export class ChatsService {
       },
     });
 
-    const message = `Analiza la conversación y escribe tus observaciones, basandote en lo sigiente: '${module.goals}'.¿Qué recomendaciones me darías para mejorar su habilidad de hacer amigos?`;
+    const message = `Analiza la conversación y escribe tus observaciones, basándote en los siguiente objetivos: '${module.goals}'.¿Qué recomendaciones me darías para mejorar su habilidad de hacer amigos?`;
 
-    const observations = await this.botService.newRequest(
-      historial,
-      message,
-      'observations',
-    );
+    let observations = '';
+
+    while (observations === '' || observations === null) {
+      observations = await this.botService.newRequest(
+        historial,
+        message,
+        'observations',
+      );
+    }
+
     await this.db.chat
       .update({
         where: {
@@ -276,5 +281,16 @@ export class ChatsService {
       });
 
     return observations;
+  }
+
+  async createObjectives(title: string) {
+    const prompt = `Escribe los objetivos que el estudiante debe cumplir en esta conversación. Estos objetivos deben estar orientados a mejorar las habilidades sociales y basados en el título de la conversación: '${title}'`;
+    let objectives = '';
+
+    while (objectives === '' || objectives === null) {
+      objectives = await this.botService.newRequest([], prompt, 'objectives');
+    }
+
+    return objectives;
   }
 }

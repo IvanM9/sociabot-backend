@@ -22,3 +22,9 @@ export class CreateInteractionsDto {
   @IsString()
   message: string;
 }
+
+export class CreateObjetiveDto {
+  @ApiProperty()
+  @IsString()
+  title: string;
+}
