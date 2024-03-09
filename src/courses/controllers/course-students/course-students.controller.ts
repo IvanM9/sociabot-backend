@@ -7,7 +7,7 @@ import { RoleEnum } from '@/security/jwt-strategy/role.enum';
 import { Role } from '@/security/jwt-strategy/roles.decorator';
 import { RoleGuard } from '@/security/jwt-strategy/roles.guard';
 import { ResponseHttpInterceptor } from '@/shared/interceptors/response-http.interceptor';
-import { ParseStatusPipe } from '@/shared/pipes/parse-status.pipe';
+import { OptionalBooleanPipe } from '@/shared/pipes/parse-bool-optional.pipe';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   Body,
@@ -63,10 +63,10 @@ export class CourseStudentsController {
   @ApiOperation({ summary: 'Obtener todos los estudiantes de un profesor' })
   async getStudentsByTeacher(
     @CurrentUser() { id }: InfoUserInterface,
-    @Query('status', ParseStatusPipe) status: boolean,
+    @Query('status', OptionalBooleanPipe) status: boolean,
     @Query('courseId') courseId?: string,
   ) {
-    const data = await this.service.listStudentsByTeacher(id,courseId, status);
+    const data = await this.service.listStudentsByTeacher(id, courseId, status);
     return { data, message: 'Estudiantes encontrados' };
   }
 
@@ -76,7 +76,7 @@ export class CourseStudentsController {
   @ApiOperation({ summary: 'Obtener los estudiantes de un curso' })
   async getStudentsByCourse(
     @Param('courseId') id: string,
-    @Query('status', ParseStatusPipe) status: boolean,
+    @Query('status', OptionalBooleanPipe) status: boolean,
   ) {
     const data = await this.service.listStudentsByCourse(id, status);
     return { data, message: 'Estudiantes encontrados' };
@@ -88,7 +88,7 @@ export class CourseStudentsController {
   @ApiOperation({ summary: 'Obtener los cursos de un estudiante' })
   async getCoursesByStudent(
     @CurrentUser() { id }: InfoUserInterface,
-    @Query('status', ParseStatusPipe) status: boolean,
+    @Query('status', OptionalBooleanPipe) status: boolean,
   ) {
     const data = await this.service.listCoursesByStudent(id, status);
     return { data, message: 'Cursos encontrados' };
