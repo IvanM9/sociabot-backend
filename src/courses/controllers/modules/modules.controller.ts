@@ -7,7 +7,7 @@ import { RoleEnum } from '@/security/jwt-strategy/role.enum';
 import { Role } from '@/security/jwt-strategy/roles.decorator';
 import { RoleGuard } from '@/security/jwt-strategy/roles.guard';
 import { ResponseHttpInterceptor } from '@/shared/interceptors/response-http.interceptor';
-import { ParseStatusPipe } from '@/shared/pipes/parse-status.pipe';
+import { OptionalBooleanPipe } from '@/shared/pipes/parse-bool-optional.pipe';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   Body,
@@ -98,7 +98,7 @@ export class ModulesController {
   @ApiOperation({ summary: 'Obtener módulos por curso' })
   async getModulesByCourse(
     @Param('courseId') courseId: string,
-    @Query('status', ParseStatusPipe) status: boolean,
+    @Query('status', OptionalBooleanPipe) status: boolean,
   ) {
     const data = await this.service.getModulesByCourse(courseId, status);
     return { data, message: 'Módulos encontrados' };
@@ -110,7 +110,7 @@ export class ModulesController {
   @ApiOperation({ summary: 'Obtener módulos por usuario ' })
   async getModulesByUser(
     @CurrentUser() { id }: InfoUserInterface,
-    @Query('status', ParseStatusPipe) status: boolean,
+    @Query('status', OptionalBooleanPipe) status: boolean,
   ) {
     const data = await this.service.listUserModules(id, status);
     return { data, message: 'Módulos encontrados' };
