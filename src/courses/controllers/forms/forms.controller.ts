@@ -72,7 +72,8 @@ export class FormsController {
     const data = await this.formService.listMyForms(
       role == RoleEnum.STUDENT ? status : true,
       moduleId,
-      role == RoleEnum.TEACHER ? id : undefined,
+      id,
+      role,
     );
 
     return { data, message: 'Formularios encontrados' };
@@ -110,7 +111,7 @@ export class FormsController {
     @Param('courseStudentId') courseStudentId: string,
     @CurrentUser() { id }: InfoUserInterface,
   ) {
-    const data = await this.formService.viewAnswersByForm( courseStudentId);
+    const data = await this.formService.viewAnswersByForm(courseStudentId);
     return { data, message: 'Respuestas encontradas' };
   }
 

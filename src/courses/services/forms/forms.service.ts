@@ -3,6 +3,7 @@ import {
   CreateFormsDTO,
 } from '@/courses/dtos/forms.dto';
 import { PrismaService } from '@/prisma.service';
+import { RoleEnum } from '@/security/jwt-strategy/role.enum';
 import {
   BadRequestException,
   Injectable,
@@ -32,33 +33,75 @@ export class FormsService {
     return { message: 'Creado correctamente' };
   }
 
-  async listMyForms(status: boolean, moduleId: string, userId: string) {
-    const forms = await this.db.forms.findMany({
-      where: {
-        createdBy: userId,
-        status,
-        moduleId: moduleId,
-        endDate: {
-          gte: new Date(),
+  async listMyForms(
+    status: boolean,
+    moduleId: string,
+    userId: string,
+    role: RoleEnum,
+  ) {
+    let forms;
+
+    if (role === RoleEnum.TEACHER) {
+      forms = await this.db.forms.findMany({
+        where: {
+          createdBy: userId,
+          status,
+          moduleId: moduleId,
         },
-      },
-      select: {
-        name: true,
-        questionsAndAnswers: true,
-        id: true,
-        startDate: true,
-        module: {
-          select: {
-            id: true,
-            name: true,
+        select: {
+          name: true,
+          questionsAndAnswers: true,
+          id: true,
+          startDate: true,
+          module: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          status: true,
+          endDate: true,
+          createdBy: true,
+          createdAt: true,
+        },
+      });
+    } else {
+      forms = await this.db.forms.findMany({
+        where: {
+          status,
+          endDate: {
+            gte: new Date(),
+          },
+          module: {
+            course: {
+              students: {
+                some: {
+                  student: {
+                    id: userId,
+                  },
+                },
+              },
+            },
           },
         },
-        status: true,
-        endDate: true,
-        createdBy: true,
-        createdAt: true,
-      },
-    });
+        select: {
+          name: true,
+          questionsAndAnswers: true,
+          id: true,
+          startDate: true,
+          module: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          status: true,
+          endDate: true,
+          createdBy: true,
+          createdAt: true,
+        },
+      });
+    }
     return forms;
   }
 
